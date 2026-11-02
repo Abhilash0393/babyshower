@@ -1,0 +1,10 @@
+__pycache__/
+.venv/
+.env
+instance/*.sqlite3
+instance/*.sqlite3-*
+.pytest_cache/
+static/music/*
+!static/music/README.txt
+static/photos/*
+!static/photos/README.txt

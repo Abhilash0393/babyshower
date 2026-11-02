@@ -1,0 +1,1 @@
+Optional: add instrumental.mp3 only if you have permission to play it. On /display, use the Start Display / Enable Music button to begin playback. Audio problems do not interrupt the slideshow or prediction meter.

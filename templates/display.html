@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Our Family, Growing</title>
+  <link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body class="display-body">
+  <main class="display-root">
+    <header class="display-header">
+      <span>MONICA &amp; FAMILY</span>
+      <span id="connectionStatus" role="status" aria-live="polite">● CONNECTING</span>
+    </header>
+    <section class="slideshow-view" id="slideshowView" aria-label="Family photo slideshow">
+      <div class="photo-frame">
+        <div class="photo-placeholder" id="photoPlaceholder">
+          <div class="photo-symbol" aria-hidden="true">♡</div>
+          <h1>Our Family, Growing</h1>
+          <p>Add approved family photos to the local static/photos folder.</p>
+        </div>
+        <img id="slideshowImage" alt="Family memory" class="slideshow-image hidden">
+        <div class="photo-caption">Little moments, endless love</div>
+      </div>
+      <button class="enable-audio" id="startDisplayButton" type="button">Start Display / Enable Music</button>
+      <p id="audioStatus" class="display-audio-status" role="status" aria-live="polite"></p>
+    </section>
+    <section class="meter-view hidden" id="meterView" aria-label="Live prediction meter">
+      <p class="eyebrow">THE CROWD HAS SPOKEN</p>
+      <h1>What's Your Prediction?</h1>
+      <p class="meter-subtitle">Every guess is a little bit of love.</p>
+      <div class="meter-columns">
+        <article class="meter-item" aria-label="Baby Girl votes">
+          <div class="meter-count" id="girlCount">0</div>
+          <div class="column-track"><div class="column-fill girl-fill" id="girlFill"></div></div>
+          <h2>Baby Girl</h2>
+          <div class="meter-percent" id="girlPercent">0%</div>
+        </article>
+        <article class="meter-item" aria-label="Baby Boy votes">
+          <div class="meter-count" id="boyCount">0</div>
+          <div class="column-track"><div class="column-fill boy-fill" id="boyFill"></div></div>
+          <h2>Baby Boy</h2>
+          <div class="meter-percent" id="boyPercent">0%</div>
+        </article>
+      </div>
+      <div class="total-votes"><strong id="totalVotes">0</strong> PREDICTIONS</div>
+    </section>
+    <section class="special-view hidden" id="specialView" aria-live="polite">
+      <p class="eyebrow">A SPECIAL MESSAGE</p>
+      <h1 id="specialMessage">A little more love is on the way</h1>
+    </section>
+    <audio id="backgroundMusic" loop preload="auto"></audio>
+    <div class="display-toast" id="displayToast" role="status" aria-live="polite"></div>
+  </main>
+  <script src="/static/js/display.js" defer></script>
+</body>
+</html>

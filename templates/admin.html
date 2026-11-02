@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <title>Baby Prediction Admin</title>
+  <link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body class="app-bg">
+  <main class="admin-wrap">
+    <div class="eyebrow">EVENT CONTROL</div>
+    <h1>Baby Prediction <span>Admin</span></h1>
+    {% if not logged_in %}
+    <section class="admin-card">
+      <h2>Admin login</h2>
+      {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+      <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <label for="adminPin">Admin PIN</label>
+        <input id="adminPin" name="pin" type="password" autocomplete="current-password" required>
+        <button class="primary-button" type="submit">Unlock controls</button>
+      </form>
+    </section>
+    {% else %}
+    <section class="admin-card">
+      <h2>Live totals</h2>
+      <div class="admin-stats">
+        {% for id,label in [('total','Total'),('girl','Girl'),('boy','Boy'),('qr','QR'),('booth','Booth')] %}
+        <div><strong id="{{ id }}">0</strong><span>{{ label }}</span></div>
+        {% endfor %}
+      </div>
+    </section>
+    <section class="admin-card">
+      <h2>Voting controls</h2>
+      <p id="votingState" aria-live="polite">Checking status…</p>
+      <button id="openVoting" class="primary-button" type="button">Open voting</button>
+      <button id="closeVoting" class="secondary-button" type="button">Close voting</button>
+      <label for="displayMode">Big-screen mode</label>
+      <select id="displayMode">
+        <option value="auto">Auto: slideshow + temporary meter</option>
+        <option value="slideshow">Slideshow only</option>
+        <option value="meter">Meter continuously</option>
+        <option value="special">Special message</option>
+      </select>
+      <label for="specialMessageInput">Special message</label>
+      <input id="specialMessageInput" maxlength="240" value="A little more love is on the way">
+      <button id="saveDisplay" class="secondary-button" type="button">Save display settings</button>
+    </section>
+    <section class="admin-card">
+      <h2>QR code &amp; links</h2>
+      <img class="qr-image" src="/qr.png" alt="QR code for phone voting">
+      <p>QR voting: <a href="{{ base_url }}/vote?mode=qr">{{ base_url }}/vote?mode=qr</a></p>
+      <p>Booth: <a href="{{ base_url }}/vote?mode=booth">{{ base_url }}/vote?mode=booth</a></p>
+      <p>Display: <a href="{{ base_url }}/display">{{ base_url }}/display</a></p>
+    </section>
+    <section class="admin-card danger-zone">
+      <h2>Reset test votes</h2>
+      <p>This permanently deletes every vote record. Only use before the event starts.</p>
+      <button class="danger-button" id="resetVotes" type="button">Reset all votes…</button>
+    </section>
+    <button id="logoutAdmin" class="secondary-button" type="button">Log out</button>
+    <p id="adminStatus" class="status" role="status" aria-live="polite"></p>
+    <script src="/static/js/admin.js" defer></script>
+    {% endif %}
+  </main>
+</body>
+</html>

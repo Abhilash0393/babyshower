@@ -1,0 +1,1 @@
+Add approved family photos here. The app automatically lists JPG/JPEG, PNG, GIF, WebP, and AVIF images in this folder; no manifest change is needed. Landscape images work well on a 16:9 display. Do not commit private family photos to a public repository.

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <title>Baby Prediction</title>
+  <link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body class="app-bg vote-body" data-mode="{{ mode }}">
+  <main class="vote-wrap">
+    <div class="eyebrow">MONICA &amp; FAMILY · BABY PREDICTION</div>
+    <section class="vote-card" id="voteCard" aria-labelledby="voteTitle">
+      <div class="tiny-star" aria-hidden="true">✦</div>
+      <h1 id="voteTitle">What's Your<br><span>Prediction?</span></h1>
+      <p class="lead">A little guess, a lot of love.</p>
+      <div class="choices">
+        <button class="choice girl-choice" data-choice="girl" type="button">
+          <span class="baby-illustration girl-baby" aria-hidden="true"><i class="face"><b class="hair"></b><b class="eyes"></b><b class="smile"></b><b class="bow"></b></i></span>
+          Baby Girl<small>Team Girl</small>
+        </button>
+        <button class="choice boy-choice" data-choice="boy" type="button">
+          <span class="baby-illustration boy-baby" aria-hidden="true"><i class="face"><b class="hair"></b><b class="eyes"></b><b class="smile"></b><b class="cap"></b></i></span>
+          Baby Boy<small>Team Boy</small>
+        </button>
+      </div>
+      <p class="privacy-note">No app to install · Just one tap</p>
+      <p class="privacy-note">This is a casual prediction game, not identity-verified one-vote-per-person.</p>
+      <p class="status" id="voteStatus" role="status" aria-live="polite"></p>
+    </section>
+    <section class="vote-card thankyou-card hidden" id="thankyouCard" aria-labelledby="thanksTitle">
+      <div class="success-mark" aria-hidden="true">✓</div>
+      <h1 id="thanksTitle">Thank You!</h1>
+      <p class="chosen" id="chosenText"></p>
+      <p class="lead">Your prediction has been counted.</p>
+      <button id="againButton" class="primary-button" type="button">Cast My Vote Again</button>
+      <p class="status" id="thankyouStatus" role="status" aria-live="polite"></p>
+    </section>
+    <footer>Made with love for our growing family ♡</footer>
+  </main>
+  <script src="/static/js/vote.js" defer></script>
+</body>
+</html>
