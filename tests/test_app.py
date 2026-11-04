@@ -1,3 +1,7 @@
+import json
+import re
+from urllib.parse import unquote
+
 import pytest
 
 from app import create_app
@@ -10,6 +14,11 @@ def app(tmp_path):
         "SECRET_KEY": "test-secret-key",
         "ADMIN_PIN": "5831",
         "DATABASE_PATH": str(tmp_path / "votes.sqlite3"),
+        "EVENT_TITLE": "Monica's Baby Shower",
+        "EVENT_DATE": "2026-11-22",
+        "EVENT_VENUE": "Hotel Highland",
+        "EVENT_DIRECTIONS_QUERY": "Hotel Highland",
+        "DISPLAY_MUSIC_FILE": "",
     })
 
 
@@ -125,6 +134,7 @@ def test_results_include_choice_and_source_counts(client):
     assert result["booth"] == 2
     assert result["girl_percent"] == 67
     assert result["boy_percent"] == 33
+    assert result["vote_sequence"] == 3
 
 
 def test_admin_requires_login_and_valid_pin(client):
@@ -173,5 +183,176 @@ def test_required_routes_are_available(client):
     assert client.get("/vote?mode=qr").status_code == 200
     assert client.get("/vote?mode=booth").status_code == 200
     assert client.get("/display").status_code == 200
+    assert client.get("/invite").status_code == 200
     assert client.get("/qr.png").mimetype == "image/png"
     assert isinstance(client.get("/api/photos").json["photos"], list)
+    assert isinstance(client.get("/api/slides").json["slides"], list)
+
+
+def test_invitation_has_configured_event_and_no_rsvp(client):
+    response = client.get("/invite")
+
+    assert response.status_code == 200
+    assert b"Monica&#39;s Baby Shower" in response.data
+    assert b"22 November" in response.data
+    assert b"Hotel Highland" in response.data
+    assert b"RSVP" not in response.data.upper()
+    assert b"og:title" in response.data
+    assert b"og:description" in response.data
+    assert b"og:image" in response.data
+    assert b"What is your prediction?" not in response.data
+    assert b"Baby Girl" not in response.data
+    assert b"Baby Boy" not in response.data
+    assert b"/vote?mode=qr" not in response.data
+    cover = client.get("/invite/cover.png")
+    assert cover.mimetype == "image/png"
+    assert cover.data.startswith(b"\x89PNG")
+
+
+def test_invitation_links_include_calendar_directions_and_whatsapp(client):
+    response = client.get("/invite")
+    page = response.data.decode()
+    whatsapp = re.search(r'href="(https://wa\.me/\?text=[^"]+)"', page)
+
+    assert b"/invite/calendar.ics" in response.data
+    assert b"google.com/maps/dir/" in response.data
+    assert whatsapp is not None
+    share_text = unquote(whatsapp.group(1))
+    assert "Monica's Baby Shower" in share_text
+    assert "22 November" in share_text
+    assert "Hotel Highland" in share_text
+    assert "http://localhost/invite" in share_text
+
+
+def test_calendar_download_is_all_day_and_valid(client):
+    response = client.get("/invite/calendar.ics")
+
+    assert response.status_code == 200
+    assert response.mimetype == "text/calendar"
+    assert "attachment" in response.headers["Content-Disposition"]
+    assert "DTSTART;VALUE=DATE:20261122" in response.text
+    assert "DTEND;VALUE=DATE:20261123" in response.text
+    assert "SUMMARY:Monica's Baby Shower" in response.text
+    assert "LOCATION:Hotel Highland" in response.text
+    assert "DTSTART:" not in response.text
+    assert all(len(line.encode("utf-8")) <= 75 for line in response.text.splitlines())
+
+
+def test_slideshow_manifest_pairs_content_and_ignores_invalid_paths(app, client, tmp_path):
+    photo_dir = tmp_path / "photos"
+    photo_dir.mkdir()
+    (photo_dir / "approved.jpg").write_bytes(b"image")
+    manifest_path = tmp_path / "manifest.json"
+    manifest_path.write_text(json.dumps([
+        {
+            "id": "approved",
+            "image": "/static/photos/approved.jpg",
+            "caption": "A tiny hand can hold an entire heart.",
+            "category": "Love",
+            "author": "Family",
+        },
+        {"id": "missing", "image": "/static/photos/missing.jpg", "caption": "Missing"},
+        {"id": "unsafe", "image": "/static/photos/../app.py", "caption": "Unsafe"},
+        {"id": "external", "image": "https://example.com/photo.jpg"},
+    ]), encoding="utf-8")
+    app.config["PHOTO_DIR"] = str(photo_dir)
+    app.config["PHOTO_MANIFEST_PATH"] = str(manifest_path)
+
+    slides = client.get("/api/slides").json["slides"]
+
+    assert slides == [{
+        "id": "approved",
+        "image": "/static/photos/approved.jpg",
+        "caption": "A tiny hand can hold an entire heart.",
+        "category": "Love",
+        "author": "Family",
+    }]
+    assert client.get("/api/photos").json["photos"] == ["/static/photos/approved.jpg"]
+
+
+def test_big_screen_admin_controls_are_authenticated_and_validated(client):
+    csrf = csrf_token(client, "/admin")
+    assert client.get("/api/admin/slides").status_code == 401
+    assert client.get("/api/admin").status_code == 401
+
+    assert admin_login(client).status_code == 200
+    with client.session_transaction() as session:
+        csrf = session["csrf_token"]
+
+    saved = admin_post(client, csrf, {"action": "slideshow", "duration": 30})
+    assert saved.status_code == 200
+    assert saved.json["slide_duration"] == 30
+
+    paused = admin_post(client, csrf, {"action": "slideshow", "paused": True})
+    assert paused.status_code == 200
+    assert paused.json["slideshow_paused"] is True
+
+    command = admin_post(client, csrf, {"action": "slideshow", "command": "next"})
+    assert command.status_code == 200
+    assert command.json["display_command"] == "next"
+    assert command.json["command_version"] == 1
+
+    invalid = admin_post(client, csrf, {"action": "slideshow", "duration": 500})
+    assert invalid.status_code == 400
+    assert client.get("/api/admin").json["slide_duration"] == 30
+
+    unconfigured_music = admin_post(
+        client, csrf, {"action": "slideshow", "music_enabled": True}
+    )
+    assert unconfigured_music.status_code == 400
+
+
+def test_display_state_only_accepts_manifest_slide_ids(app, client, tmp_path):
+    photo_dir = tmp_path / "photos"
+    photo_dir.mkdir()
+    (photo_dir / "memory.webp").write_bytes(b"image")
+    manifest_path = tmp_path / "manifest.json"
+    manifest_path.write_text(json.dumps([
+        {"id": "memory-1", "image": "/static/photos/memory.webp", "caption": "Memory"}
+    ]), encoding="utf-8")
+    app.config["PHOTO_DIR"] = str(photo_dir)
+    app.config["PHOTO_MANIFEST_PATH"] = str(manifest_path)
+    csrf = csrf_token(client, "/display")
+
+    rejected = client.post(
+        "/api/display-state",
+        json={"slide_id": "unexpected"},
+        headers={"X-CSRF-Token": csrf},
+    )
+    assert rejected.status_code == 400
+
+    accepted = client.post(
+        "/api/display-state",
+        json={"slide_id": "memory-1"},
+        headers={"X-CSRF-Token": csrf},
+    )
+    assert accepted.status_code == 200
+    assert client.get("/api/admin").status_code == 401
+    assert client.get("/api/results").json["current_slide_id"] == "memory-1"
+
+
+def test_invalid_music_path_does_not_break_public_display(app, client):
+    app.config["DISPLAY_MUSIC_FILE"] = "../private.mp3"
+
+    assert client.get("/display").status_code == 200
+    assert client.get("/api/results").status_code == 200
+    assert client.get("/api/results").json["music_url"] == ""
+
+
+def test_vote_sequence_survives_vote_reset_and_only_counts_votes(client):
+    csrf = csrf_token(client, "/vote?mode=booth")
+    assert vote(client, csrf, "girl", "booth").status_code == 201
+    assert client.get("/api/results").json["vote_sequence"] == 1
+
+    assert admin_login(client).status_code == 200
+    with client.session_transaction() as session:
+        csrf = session["csrf_token"]
+    reset = admin_post(client, csrf, {"action": "reset", "confirm": True})
+
+    assert reset.status_code == 200
+    assert reset.json["vote_sequence"] == 1
+    assert reset.json["total"] == 0
+
+    booth_csrf = csrf_token(client, "/vote?mode=booth")
+    assert vote(client, booth_csrf, "boy", "booth").status_code == 201
+    assert client.get("/api/results").json["vote_sequence"] == 2

@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="csrf-token" content="{{ csrf_token }}">
-  <title>Baby Prediction</title>
+  <title>{{ event_title }} · Prediction</title>
   <link rel="stylesheet" href="/static/css/app.css">
 </head>
 <body class="app-bg vote-body" data-mode="{{ mode }}">
   <main class="vote-wrap">
-    <div class="eyebrow">MONICA &amp; FAMILY · BABY PREDICTION</div>
+    <div class="eyebrow">{{ event_title|upper }} · PREDICTION</div>
     <section class="vote-card" id="voteCard" aria-labelledby="voteTitle">
       <div class="tiny-star" aria-hidden="true">✦</div>
       <h1 id="voteTitle">What's Your<br><span>Prediction?</span></h1>

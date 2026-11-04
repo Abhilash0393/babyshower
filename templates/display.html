@@ -3,26 +3,34 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Our Family, Growing</title>
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <title>{{ event_title }} · Big Screen</title>
   <link rel="stylesheet" href="/static/css/app.css">
 </head>
 <body class="display-body">
   <main class="display-root">
     <header class="display-header">
-      <span>MONICA &amp; FAMILY</span>
+      <span>{{ event_title|upper }}</span>
       <span id="connectionStatus" role="status" aria-live="polite">● CONNECTING</span>
     </header>
     <section class="slideshow-view" id="slideshowView" aria-label="Family photo slideshow">
       <div class="photo-frame">
         <div class="photo-placeholder" id="photoPlaceholder">
-          <div class="photo-symbol" aria-hidden="true">♡</div>
-          <h1>Our Family, Growing</h1>
-          <p>Add approved family photos to the local static/photos folder.</p>
+          <div class="photo-symbol" aria-hidden="true">✿</div>
+          <h1>{{ event_title }}</h1>
+          <p>Add approved photographs and matching thoughts to the slideshow manifest.</p>
         </div>
-        <img id="slideshowImage" alt="Family memory" class="slideshow-image hidden">
-        <div class="photo-caption">Little moments, endless love</div>
+        <img id="slideshowImage" alt="" class="slideshow-image hidden">
+        <div class="photo-caption hidden" id="photoCaption">
+          <span id="captionText"></span>
+          <span class="photo-category" id="captionCategory"></span>
+          <span class="photo-author" id="captionAuthor"></span>
+        </div>
       </div>
-      <button class="enable-audio" id="startDisplayButton" type="button">Start Display / Enable Music</button>
+      <div class="display-controls">
+        <button class="enable-audio" id="toggleMusicButton" type="button">Enable Music</button>
+        <span id="slideshowState" class="display-audio-status" role="status" aria-live="polite"></span>
+      </div>
       <p id="audioStatus" class="display-audio-status" role="status" aria-live="polite"></p>
     </section>
     <section class="meter-view hidden" id="meterView" aria-label="Live prediction meter">
@@ -49,7 +57,7 @@
       <p class="eyebrow">A SPECIAL MESSAGE</p>
       <h1 id="specialMessage">A little more love is on the way</h1>
     </section>
-    <audio id="backgroundMusic" loop preload="auto"></audio>
+    <audio id="backgroundMusic" loop preload="none"></audio>
     <div class="display-toast" id="displayToast" role="status" aria-live="polite"></div>
   </main>
   <script src="/static/js/display.js" defer></script>

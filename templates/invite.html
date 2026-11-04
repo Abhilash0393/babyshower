@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#6d2434">
+  <meta name="description" content="{{ share_description }}">
+  <meta property="og:title" content="{{ event_title }}">
+  <meta property="og:description" content="{{ share_description }}">
+  <meta property="og:image" content="{{ cover_url }}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Kolam-inspired invitation to Monica's Baby Shower">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{{ invite_url }}">
+  <title>{{ event_title }} · Invitation</title>
+  <link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body class="app-bg invite-body">
+  <main class="invite-wrap">
+    <article class="invite-card">
+      <img class="kolam-corner invite-ornament" src="/static/images/kolam-corner.svg" alt="" aria-hidden="true">
+      <div class="invite-garland" aria-hidden="true"></div>
+      <p class="eyebrow invite-eyebrow">A NEW CHAPTER BEGINS</p>
+      <svg class="invite-kolam" viewBox="0 0 120 120" aria-hidden="true">
+        <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <circle cx="60" cy="60" r="44"></circle>
+          <circle cx="60" cy="60" r="29"></circle>
+          <path d="M60 39c9 6 15 12 21 21-6 9-12 15-21 21-9-6-15-12-21-21 6-9 12-15 21-21Z"></path>
+          <path d="M60 4v14m0 84v14M4 60h14m84 0h14M20 20l10 10m60 60 10 10m0-80L90 30M30 90 20 100"></path>
+        </g>
+        <g fill="currentColor">
+          <circle cx="60" cy="4" r="2.5"></circle><circle cx="60" cy="116" r="2.5"></circle>
+          <circle cx="4" cy="60" r="2.5"></circle><circle cx="116" cy="60" r="2.5"></circle>
+        </g>
+      </svg>
+      <div class="invite-lamp" aria-hidden="true"><span></span></div>
+      <h1 class="invite-title">{{ event_title }}</h1>
+      <p class="invite-intro">Join us for a day filled with blessings, love and family.</p>
+
+      <div class="invite-details">
+        <div><span class="detail-label">DATE</span><strong>{{ event_date }}</strong></div>
+        <div><span class="detail-label">VENUE</span><strong>{{ event_venue }}</strong></div>
+      </div>
+
+      <p class="invite-mystery">One little mystery.<br><span>Two big possibilities.</span></p>
+      <p class="invite-callout">Come celebrate with us!</p>
+
+      <nav class="invite-actions" aria-label="Invitation actions">
+        <a class="primary-button" href="/invite/calendar.ics">Add to Calendar</a>
+        <a class="secondary-button" href="{{ directions_url }}" target="_blank" rel="noopener">Get Directions</a>
+        <a class="secondary-button" href="{{ whatsapp_url }}" target="_blank" rel="noopener">Share on WhatsApp</a>
+      </nav>
+      <img class="kolam-corner invite-bottom-ornament" src="/static/images/kolam-corner.svg" alt="" aria-hidden="true">
+    </article>
+    <footer class="invite-footer">With love, Monica &amp; family</footer>
+  </main>
+</body>
+</html>

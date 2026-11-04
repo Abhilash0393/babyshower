@@ -4,15 +4,27 @@
   const meter = $("meterView");
   const special = $("specialView");
   const audio = $("backgroundMusic");
-  let photos = [];
-  let photoIndex = -1;
-  let lastId = null;
+  const image = $("slideshowImage");
+  const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+  let slides = [];
+  let queue = [];
+  let history = [];
+  let historyCursor = -1;
+  let currentSlide = null;
+  let previousVoteSequence = null;
   let previousGirl = null;
   let previousBoy = null;
-  let previousTotal = null;
   let meterUntil = 0;
   let currentMode = "auto";
-  let toastTimeout;
+  let slideDuration = 15;
+  let slideshowPaused = false;
+  let musicAllowed = false;
+  let musicReady = false;
+  let userPausedMusic = false;
+  let lastCommandVersion = null;
+  let lastControlVersion = null;
+  let slideTimer = null;
+  let toastTimeout = null;
 
   function showView(view) {
     slideshow.classList.toggle("hidden", view !== "slideshow");
@@ -20,19 +32,156 @@
     special.classList.toggle("hidden", view !== "special");
   }
 
-  function nextPhoto() {
-    if (!photos.length) return;
-    photoIndex = (photoIndex + 1) % photos.length;
-    const image = $("slideshowImage");
+  function selectView() {
+    if (currentMode === "auto") {
+      showView(Date.now() < meterUntil ? "meter" : "slideshow");
+    } else {
+      showView(currentMode);
+    }
+  }
+
+  function shuffleQueue() {
+    queue = slides
+      .filter((slide) => slides.length === 1 || !currentSlide || slide.id !== currentSlide.id)
+      .map((slide) => slide.id);
+    for (let index = queue.length - 1; index > 0; index -= 1) {
+      const randomIndex = Math.floor(Math.random() * (index + 1));
+      [queue[index], queue[randomIndex]] = [queue[randomIndex], queue[index]];
+    }
+  }
+
+  function preloadNext() {
+    if (!queue.length && slides.length) shuffleQueue();
+    if (!queue.length) return;
+    const next = slides.find((slide) => slide.id === queue[0]);
+    if (next) {
+      const nextImage = new Image();
+      nextImage.src = next.image;
+    }
+  }
+
+  async function reportCurrentSlide(slide) {
+    try {
+      await fetch("/api/display-state", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": csrfToken,
+        },
+        body: JSON.stringify({ slide_id: slide.id }),
+      });
+    } catch (error) {
+      $("audioStatus").textContent = "The display is running; slide preview may be out of date.";
+    }
+  }
+
+  function showSlide(slide) {
+    if (!slide) return;
+    currentSlide = slide;
     image.classList.remove("photo-in");
     image.onload = () => requestAnimationFrame(() => image.classList.add("photo-in"));
     image.onerror = () => {
-      image.classList.add("hidden");
+      slides = slides.filter((item) => item.id !== slide.id);
+      history = history.filter((id) => id !== slide.id);
+      historyCursor = history.length - 1;
       $("photoPlaceholder").classList.remove("hidden");
+      image.classList.add("hidden");
+      $("photoCaption").classList.add("hidden");
+      $("photoPlaceholder").querySelector("p").textContent =
+        "A photo could not be loaded. Add valid local images to the manifest.";
+      shuffleQueue();
+      if (slides.length) advanceSlide();
     };
-    image.src = photos[photoIndex];
+    image.alt = slide.caption || slide.category || "Family photograph";
+    image.src = slide.image;
     image.classList.remove("hidden");
     $("photoPlaceholder").classList.add("hidden");
+    $("captionText").textContent = slide.caption || "";
+    $("captionCategory").textContent = slide.category || "";
+    $("captionAuthor").textContent = slide.author ? `— ${slide.author}` : "";
+    $("photoCaption").classList.toggle(
+      "hidden", !slide.caption && !slide.category && !slide.author
+    );
+    reportCurrentSlide(slide);
+    preloadNext();
+  }
+
+  function advanceSlide() {
+    if (!slides.length) return;
+    if (historyCursor < history.length - 1) {
+      historyCursor += 1;
+      const priorSlide = slides.find((slide) => slide.id === history[historyCursor]);
+      if (priorSlide) showSlide(priorSlide);
+      return;
+    }
+    if (!queue.length) shuffleQueue();
+    const nextId = queue.shift();
+    const nextSlide = slides.find((slide) => slide.id === nextId);
+    if (!nextSlide) {
+      advanceSlide();
+      return;
+    }
+    history.push(nextId);
+    if (history.length > 80) history.shift();
+    historyCursor = history.length - 1;
+    showSlide(nextSlide);
+    preloadNext();
+  }
+
+  function previousSlide() {
+    if (historyCursor <= 0) return;
+    historyCursor -= 1;
+    const previous = slides.find((slide) => slide.id === history[historyCursor]);
+    if (previous) showSlide(previous);
+  }
+
+  async function loadSlides(keepCurrent = false) {
+    try {
+      const response = await fetch("/api/slides", { cache: "no-store" });
+      if (!response.ok) throw new Error("Could not load the slideshow manifest.");
+      const data = await response.json();
+      if (!Array.isArray(data.slides)) throw new Error("Invalid slideshow manifest response.");
+      slides = data.slides.filter(
+        (slide) => slide && typeof slide.id === "string" && typeof slide.image === "string"
+      );
+      const savedSlide = keepCurrent && currentSlide
+        ? slides.find((slide) => slide.id === currentSlide.id)
+        : null;
+      queue = [];
+      history = [];
+      historyCursor = -1;
+      if (savedSlide) {
+        history.push(savedSlide.id);
+        historyCursor = 0;
+        showSlide(savedSlide);
+      } else if (slides.length) {
+        shuffleQueue();
+        advanceSlide();
+      } else {
+        currentSlide = null;
+        image.classList.add("hidden");
+        $("photoCaption").classList.add("hidden");
+        $("photoPlaceholder").classList.remove("hidden");
+        $("photoPlaceholder").querySelector("p").textContent =
+          "Add approved photographs and matching thoughts to static/photos/manifest.json.";
+      }
+    } catch (error) {
+      $("photoPlaceholder").classList.remove("hidden");
+      $("photoPlaceholder").querySelector("p").textContent =
+        "The slideshow manifest could not be loaded. Live predictions will continue to work.";
+      $("connectionStatus").textContent = "● RECONNECTING";
+    }
+  }
+
+  function scheduleSlide() {
+    window.clearTimeout(slideTimer);
+    if (slideshowPaused || !slides.length || currentMode === "meter" || currentMode === "special") {
+      return;
+    }
+    slideTimer = window.setTimeout(() => {
+      advanceSlide();
+      scheduleSlide();
+    }, slideDuration * 1000);
   }
 
   function pulse(element) {
@@ -47,7 +196,7 @@
     element.classList.add("vote-pulse");
   }
 
-  function render(data) {
+  function renderResults(data) {
     $("girlCount").textContent = data.girl;
     $("boyCount").textContent = data.boy;
     $("totalVotes").textContent = data.total;
@@ -58,77 +207,119 @@
     $("specialMessage").textContent = data.special_message || "A little more love is on the way";
   }
 
-  function selectView() {
-    if (currentMode === "auto") {
-      showView(Date.now() < meterUntil ? "meter" : "slideshow");
-    } else {
-      showView(currentMode);
+  function updateMusic(data) {
+    const button = $("toggleMusicButton");
+    const available = Boolean(data.music_url);
+    musicAllowed = Boolean(data.music_enabled && available);
+    if ((audio.getAttribute("src") || "") !== (data.music_url || "")) {
+      audio.pause();
+      audio.src = data.music_url || "";
     }
+    button.disabled = !available || !musicAllowed;
+    button.textContent = audio.paused ? "Enable Music" : "Disable Music";
+    if (!available) {
+      $("audioStatus").textContent = "Optional music is not configured.";
+    } else if (!musicAllowed) {
+      audio.pause();
+      $("audioStatus").textContent = "Music is disabled in the admin controls.";
+    } else if (!musicReady) {
+      $("audioStatus").textContent = "Music is ready. Tap Enable Music to start playback.";
+    } else if (audio.paused && !userPausedMusic) {
+      audio.play().catch(() => {
+        $("audioStatus").textContent = "Tap Enable Music to allow audio playback.";
+      });
+    }
+  }
+
+  async function processCommand(data) {
+    if (lastCommandVersion === null) {
+      lastCommandVersion = data.command_version;
+      return;
+    }
+    if (data.command_version === lastCommandVersion) return;
+    lastCommandVersion = data.command_version;
+    if (data.display_command === "next") advanceSlide();
+    if (data.display_command === "previous") previousSlide();
+    if (data.display_command === "reload") await loadSlides(true);
+    scheduleSlide();
   }
 
   async function refresh() {
     try {
       const response = await fetch("/api/results", { cache: "no-store" });
-      if (!response.ok) throw new Error("Results request failed");
+      if (!response.ok) throw new Error("Results request failed.");
       const data = await response.json();
       $("connectionStatus").textContent = "● LIVE";
       const girlDelta = previousGirl === null ? 0 : data.girl - previousGirl;
       const boyDelta = previousBoy === null ? 0 : data.boy - previousBoy;
-      if (lastId !== null && (girlDelta > 0 || boyDelta > 0)) {
+      if (
+        previousVoteSequence !== null
+        && data.vote_sequence > previousVoteSequence
+      ) {
         meterUntil = Date.now() + 10000;
-        const newVotes = Math.max(1, data.total - previousTotal);
-        $("displayToast").textContent = `${newVotes} new prediction${newVotes === 1 ? "" : "s"} just arrived!`;
+        const newVotes = data.vote_sequence - previousVoteSequence;
+        $("displayToast").textContent =
+          `${newVotes} new prediction${newVotes === 1 ? "" : "s"} just arrived!`;
         $("displayToast").classList.add("show");
         window.clearTimeout(toastTimeout);
-        toastTimeout = window.setTimeout(() => $("displayToast").classList.remove("show"), 2400);
+        toastTimeout = window.setTimeout(
+          () => $("displayToast").classList.remove("show"), 2400
+        );
         pulse($("totalVotes"));
         if (girlDelta > 0) pulseFill($("girlFill"));
         if (boyDelta > 0) pulseFill($("boyFill"));
       }
-      lastId = data.last_id;
       previousGirl = data.girl;
       previousBoy = data.boy;
-      previousTotal = data.total;
+      previousVoteSequence = data.vote_sequence;
       currentMode = data.display_mode || "auto";
-      render(data);
+      slideDuration = Number.isInteger(data.slide_duration)
+        ? Math.min(120, Math.max(5, data.slide_duration))
+        : 15;
+      slideshowPaused = Boolean(data.slideshow_paused);
+      $("slideshowState").textContent = slideshowPaused
+        ? "Slideshow paused"
+        : `Next slide in about ${slideDuration} seconds`;
+      renderResults(data);
+      updateMusic(data);
       selectView();
+      if (lastControlVersion !== data.control_version) {
+        lastControlVersion = data.control_version;
+        scheduleSlide();
+      }
+      await processCommand(data);
     } catch (error) {
       $("connectionStatus").textContent = "● RECONNECTING";
-      if (currentMode === "auto" && Date.now() >= meterUntil) {
-        showView("slideshow");
-      }
+      if (currentMode === "auto" && Date.now() >= meterUntil) showView("slideshow");
     } finally {
-      window.setTimeout(refresh, 1800);
+      window.setTimeout(refresh, 5000);
     }
   }
 
-  async function loadPhotos() {
-    try {
-      const response = await fetch("/api/photos", { cache: "no-store" });
-      if (!response.ok) throw new Error("Could not load local photo list.");
-      const data = await response.json();
-      photos = data.photos;
-      if (photos.length) nextPhoto();
-    } catch (error) {
-      $("photoPlaceholder").querySelector("p").textContent =
-        "The photo list could not be loaded. The live prediction display will continue to work.";
-    }
-  }
-
-  $("startDisplayButton").addEventListener("click", async () => {
-    audio.src = "/static/music/instrumental.mp3";
-    try {
-      await audio.play();
-      $("audioStatus").textContent = "Display started. Music is playing.";
-      $("startDisplayButton").textContent = "Music enabled";
-    } catch (error) {
-      $("audioStatus").textContent =
-        "The slideshow is running, but music is unavailable. Add an approved instrumental.mp3 file to static/music.";
-      $("startDisplayButton").textContent = "Display started · music unavailable";
+  $("toggleMusicButton").addEventListener("click", async () => {
+    if (!musicAllowed) return;
+    if (audio.paused) {
+      musicReady = true;
+      userPausedMusic = false;
+      try {
+        await audio.play();
+        $("audioStatus").textContent = "Music is playing.";
+        $("toggleMusicButton").textContent = "Disable Music";
+      } catch (error) {
+        $("audioStatus").textContent = "Music could not start. Check the configured audio file.";
+      }
+    } else {
+      audio.pause();
+      userPausedMusic = true;
+      $("toggleMusicButton").textContent = "Enable Music";
+      $("audioStatus").textContent = "Music is paused on this display.";
     }
   });
 
-  loadPhotos();
-  window.setInterval(nextPhoto, 6000);
+  audio.addEventListener("error", () => {
+    $("audioStatus").textContent = "Optional music could not be loaded; the display continues without audio.";
+  });
+
+  loadSlides().then(scheduleSlide);
   refresh();
 })();

@@ -8,3 +8,4 @@ static/music/*
 !static/music/README.txt
 static/photos/*
 !static/photos/README.txt
+!static/photos/manifest.json

@@ -4,13 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="csrf-token" content="{{ csrf_token }}">
-  <title>Baby Prediction Admin</title>
+  <title>{{ event_title }} · Admin</title>
   <link rel="stylesheet" href="/static/css/app.css">
 </head>
 <body class="app-bg">
   <main class="admin-wrap">
     <div class="eyebrow">EVENT CONTROL</div>
-    <h1>Baby Prediction <span>Admin</span></h1>
+    <h1>{{ event_title }} <span>Admin</span></h1>
     {% if not logged_in %}
     <section class="admin-card">
       <h2>Admin login</h2>
@@ -36,16 +36,46 @@
       <p id="votingState" aria-live="polite">Checking status…</p>
       <button id="openVoting" class="primary-button" type="button">Open voting</button>
       <button id="closeVoting" class="secondary-button" type="button">Close voting</button>
-      <label for="displayMode">Big-screen mode</label>
+    </section>
+    <section class="admin-card" aria-labelledby="bigScreenHeading">
+      <h2 id="bigScreenHeading">Big Screen Experience</h2>
+      <label for="displayMode">Display mode</label>
       <select id="displayMode">
-        <option value="auto">Auto: slideshow + temporary meter</option>
+        <option value="auto">Automatic: slideshow + prediction results</option>
         <option value="slideshow">Slideshow only</option>
-        <option value="meter">Meter continuously</option>
+        <option value="meter">Prediction results only</option>
         <option value="special">Special message</option>
       </select>
       <label for="specialMessageInput">Special message</label>
       <input id="specialMessageInput" maxlength="240" value="A little more love is on the way">
-      <button id="saveDisplay" class="secondary-button" type="button">Save display settings</button>
+      <button id="saveDisplay" class="secondary-button" type="button">Save display mode</button>
+
+      <label for="slideDuration">Slide duration (5–120 seconds)</label>
+      <input id="slideDuration" type="number" min="5" max="120" value="15">
+      <button id="saveSlideDuration" class="secondary-button" type="button">Save duration</button>
+      <div class="admin-actions">
+        <button id="pauseSlideshow" class="secondary-button" type="button">Pause slideshow</button>
+        <button id="previousSlide" class="secondary-button" type="button">Previous slide</button>
+        <button id="nextSlide" class="secondary-button" type="button">Next slide</button>
+      </div>
+      <label>
+        <input id="musicEnabled" type="checkbox">
+        Enable configured licensed music
+      </label>
+      <p id="musicAvailability" class="privacy-note">Music is optional and is not enabled by default.</p>
+      <div class="admin-actions">
+        <button id="previewSlide" class="secondary-button" type="button">Preview current slide</button>
+        <button id="reloadManifest" class="secondary-button" type="button">Reload photo manifest</button>
+      </div>
+      <div class="slide-preview" id="slidePreview">
+        <img id="previewImage" class="hidden" alt="Current slideshow preview">
+        <div>
+          <strong id="previewCaption">No slide selected</strong>
+          <p id="previewCategory"></p>
+        </div>
+      </div>
+      <h3>Available slideshow photos</h3>
+      <ul class="slide-list" id="slideList"><li>Loading…</li></ul>
     </section>
     <section class="admin-card">
       <h2>QR code &amp; links</h2>
@@ -53,6 +83,7 @@
       <p>QR voting: <a href="{{ base_url }}/vote?mode=qr">{{ base_url }}/vote?mode=qr</a></p>
       <p>Booth: <a href="{{ base_url }}/vote?mode=booth">{{ base_url }}/vote?mode=booth</a></p>
       <p>Display: <a href="{{ base_url }}/display">{{ base_url }}/display</a></p>
+      <p>Invitation: <a href="{{ base_url }}/invite">{{ base_url }}/invite</a></p>
     </section>
     <section class="admin-card danger-zone">
       <h2>Reset test votes</h2>
