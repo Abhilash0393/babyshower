@@ -10,11 +10,17 @@
   let busy = false;
 
   function animateSelection(button) {
+    buttons.forEach((choice) => {
+      choice.classList.toggle("is-selecting", choice === button);
+      choice.classList.toggle("is-muted", choice !== button);
+    });
     button.classList.add("is-selecting");
-    const duration = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 900;
+    const duration = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 1400;
     return new Promise((resolve) => {
       window.setTimeout(() => {
-        button.classList.remove("is-selecting");
+        buttons.forEach((choice) => {
+          choice.classList.remove("is-selecting", "is-muted");
+        });
         resolve();
       }, duration);
     });

@@ -54,10 +54,9 @@ The invitation details are configurable through `.env`. The provided defaults ar
 
 The invitation at `/invite` includes an Add to Calendar download, Google Maps directions, WhatsApp sharing, and a configurable Open Graph cover image at `/invite/cover.png`. Voting is not offered on the invitation page; guests can use the separate QR and booth voting pages.
 
-## Add motherhood photos and thoughts
+## Motherhood slideshow
 
-1. Add approved landscape images under `static/photos/` (for example `static/photos/motherhood/`). Supported formats are JPG/JPEG, PNG, GIF, WebP, and AVIF.
-2. Add each image and its matching caption to `static/photos/manifest.json`:
+The display is preloaded with eight local motherhood images and original captions in `static/photos/manifest.json`; it starts cycling them automatically. Two public-domain or Creative Commons artworks include credits in `static/photos/README.txt`. To customize it, replace or add approved landscape images under `static/photos/` (for example `static/photos/motherhood/`). Supported formats are JPG/JPEG, PNG, GIF, WebP, and AVIF. Add each image and its matching caption to the manifest:
 
    ```json
    [
@@ -70,15 +69,16 @@ The invitation at `/invite` includes an Add to Calendar download, Google Maps di
    ]
    ```
 
-   `author` is optional. The image file is only an example path; add a real, locally stored image before using it. The app validates paths and skips missing or unsafe entries. With no valid slides it shows a placeholder instead of fake content.
-3. On `/display`, the slideshow shuffles slides without immediately repeating one, preloads the next image, and rotates every 15 seconds by default. In automatic mode, new votes show the live results for 10 seconds; subsequent votes extend the results display. It then continues from the queued slide.
-4. On `/admin`, use **Big Screen Experience** to change mode or duration, pause/resume, navigate, preview the current slide, inspect the available list, and request a manifest reload.
+   `author` is optional.    The app validates paths and skips missing or unsafe entries. If no valid slides remain, it reports that rather than showing fabricated content.
+On `/display`, the slideshow shuffles slides without immediately repeating one, preloads the next image, and rotates every 15 seconds by default. In automatic mode, new votes show the live results for 10 seconds; subsequent votes extend the results display. It then continues from the queued slide. On `/admin`, use **Big Screen Experience** to change mode or duration, pause/resume, navigate, preview the current slide, inspect the available list, and request a manifest reload.
 
 Private photographs are excluded from Git by default. For deployment, copy them directly to the host and edit the manifest there, or use a private repository.
 
-## Optional background music
+## Background music
 
-Only configure audio you supplied or are licensed to play. Copy an MP3, OGG, or WAV into `static/music/`, then set `DISPLAY_MUSIC_FILE` in the private `.env` to the filename (for example `instrumental.mp3`). Audio is disabled by default. Enable it from the admin controls, then tap **Enable Music** on the display because browsers may block autoplay. Missing or invalid audio does not interrupt slides or results. Music files are excluded from Git.
+The display uses the workspace's India drums, tabla, and sitar instrumental by default; its filename credits Alex Morgan. Its tuning is not documented, so no 455 Hz or 777 Hz claim is made. Tap **Enable Music** on the display to start playback because browsers may block autoplay. You can replace it with an MP3, OGG, or WAV that you supplied or are licensed to use by setting `DISPLAY_MUSIC_FILE` in the private `.env`; leave it empty to disable music. Missing or invalid audio does not interrupt slides or results.
+
+The prediction meter emphasizes the live percentage split while retaining individual and total vote counts. Before any votes are cast, it shows a clearly labeled even 50/50 starting split without recording placeholder votes.
 
 ## Display and voting behavior
 

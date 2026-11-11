@@ -6,6 +6,15 @@ instance/*.sqlite3-*
 .pytest_cache/
 static/music/*
 !static/music/README.txt
+!static/music/alex-morgan-india-drums-tabla-sitar-ethnic-mood-587419.mp3
 static/photos/*
 !static/photos/README.txt
 !static/photos/manifest.json
+!static/photos/20bce4a8c0d950d511daa6029fb769ee.jpg
+!static/photos/277753206cb5ca6d744b336a483f509b.jpg
+!static/photos/2f1816d0d889e4aade928900632aa3f0.jpg
+!static/photos/549d5e49e8d0a2356648a31ff9796779.jpg
+!static/photos/7225a0f36265f7e124eb843bfbc62f5a.jpg
+!static/photos/bd09eced6b4c4c054bbefc9ec8de86d3.jpg
+!static/photos/mother-child-vintage-public-domain.jpg
+!static/photos/mother-young-sewing-mary-cassatt.jpg

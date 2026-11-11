@@ -9,6 +9,7 @@
 </head>
 <body class="display-body">
   <main class="display-root">
+    <div class="kolam-frame" aria-hidden="true"></div>
     <header class="display-header">
       <span>{{ event_title|upper }}</span>
       <span id="connectionStatus" role="status" aria-live="polite">● CONNECTING</span>
@@ -31,24 +32,25 @@
         <button class="enable-audio" id="toggleMusicButton" type="button">Enable Music</button>
         <span id="slideshowState" class="display-audio-status" role="status" aria-live="polite"></span>
       </div>
+      <p class="music-credit">India drums · tabla · sitar · Track credited to Alex Morgan</p>
       <p id="audioStatus" class="display-audio-status" role="status" aria-live="polite"></p>
     </section>
     <section class="meter-view hidden" id="meterView" aria-label="Live prediction meter">
-      <p class="eyebrow">THE CROWD HAS SPOKEN</p>
-      <h1>What's Your Prediction?</h1>
-      <p class="meter-subtitle">Every guess is a little bit of love.</p>
+      <p class="eyebrow">A LITTLE GUESS, A LOT OF LOVE</p>
+      <h1>The Room Is Leaning...</h1>
+      <p class="meter-subtitle" id="meterSubtitle">Live share of guest predictions.</p>
       <div class="meter-columns">
-        <article class="meter-item" aria-label="Baby Girl votes">
-          <div class="meter-count" id="girlCount">0</div>
+        <article class="meter-item" aria-label="Baby Girl prediction share">
+          <div class="meter-share" id="girlPercent">50%</div>
           <div class="column-track"><div class="column-fill girl-fill" id="girlFill"></div></div>
           <h2>Baby Girl</h2>
-          <div class="meter-percent" id="girlPercent">0%</div>
+          <div class="meter-vote-count"><span id="girlCount">0</span> votes</div>
         </article>
-        <article class="meter-item" aria-label="Baby Boy votes">
-          <div class="meter-count" id="boyCount">0</div>
+        <article class="meter-item" aria-label="Baby Boy prediction share">
+          <div class="meter-share" id="boyPercent">50%</div>
           <div class="column-track"><div class="column-fill boy-fill" id="boyFill"></div></div>
           <h2>Baby Boy</h2>
-          <div class="meter-percent" id="boyPercent">0%</div>
+          <div class="meter-vote-count"><span id="boyCount">0</span> votes</div>
         </article>
       </div>
       <div class="total-votes"><strong id="totalVotes">0</strong> PREDICTIONS</div>

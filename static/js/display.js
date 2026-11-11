@@ -200,10 +200,15 @@
     $("girlCount").textContent = data.girl;
     $("boyCount").textContent = data.boy;
     $("totalVotes").textContent = data.total;
-    $("girlPercent").textContent = `${data.girl_percent}%`;
-    $("boyPercent").textContent = `${data.boy_percent}%`;
-    $("girlFill").style.height = `${data.total ? Math.max(4, data.girl_percent) : 0}%`;
-    $("boyFill").style.height = `${data.total ? Math.max(4, data.boy_percent) : 0}%`;
+    const girlShare = data.total ? data.girl_percent : 50;
+    const boyShare = data.total ? data.boy_percent : 50;
+    $("girlPercent").textContent = `${girlShare}%`;
+    $("boyPercent").textContent = `${boyShare}%`;
+    $("meterSubtitle").textContent = data.total
+      ? "Live share of guest predictions."
+      : "An even split to start; the first prediction will set the pace.";
+    $("girlFill").style.height = `${girlShare}%`;
+    $("boyFill").style.height = `${boyShare}%`;
     $("specialMessage").textContent = data.special_message || "A little more love is on the way";
   }
 

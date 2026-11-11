@@ -189,6 +189,56 @@ def test_required_routes_are_available(client):
     assert isinstance(client.get("/api/slides").json["slides"], list)
 
 
+def test_display_uses_prediction_language_percentages_and_kolam_frame(client):
+    page = client.get("/display").data
+
+    assert b"The Room Is Leaning..." in page
+    assert b"What's Your Prediction?" not in page
+    assert b'id="girlPercent"' in page
+    assert b'id="boyPercent"' in page
+    assert b'id="girlCount"' in page
+    assert b'id="boyCount"' in page
+    assert b'class="kolam-frame"' in page
+
+
+def test_slideshow_manifest_has_loadable_motherhood_slides(client):
+    slides = client.get("/api/slides").json["slides"]
+
+    assert len(slides) == 8
+    for slide in slides:
+        assert slide["id"]
+        assert slide["caption"]
+        assert client.get(slide["image"]).status_code == 200
+
+
+def test_bundled_indian_instrumental_mix_is_ready_by_default(tmp_path):
+    app = create_app({
+        "TESTING": True,
+        "DATABASE_PATH": str(tmp_path / "votes.sqlite3"),
+    })
+    client = app.test_client()
+
+    results = client.get("/api/results").json
+
+    assert results["music_enabled"] is True
+    assert results["music_url"] == (
+        "/static/music/alex-morgan-india-drums-tabla-sitar-ethnic-mood-587419.mp3"
+    )
+    assert client.get(results["music_url"]).mimetype == "audio/mpeg"
+
+
+def test_voting_modes_show_clear_choices_without_install_or_privacy_copy(client):
+    for mode in ("qr", "booth"):
+        response = client.get(f"/vote?mode={mode}")
+
+        assert response.status_code == 200
+        assert response.data.count(b'class="choice ') == 2
+        assert b"Baby Girl" in response.data
+        assert b"Baby Boy" in response.data
+        assert b"No app to install" not in response.data
+        assert b"identity-verified one-vote-per-person" not in response.data
+
+
 def test_invitation_has_configured_event_and_no_rsvp(client):
     response = client.get("/invite")
 

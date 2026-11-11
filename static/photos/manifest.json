@@ -1,30 +1,52 @@
 [
   {
-    "quote": "Life began with waking up and loving my mother's face.",
-    "author": "George Eliot"
+    "id": "motherhood-sunset-walk",
+    "image": "/static/photos/20bce4a8c0d950d511daa6029fb769ee.jpg",
+    "caption": "A mother's hand makes every new path feel safe.",
+    "category": "A Mother's Love"
   },
   {
-    "quote": "Youth fades; love droops; the leaves of friendship fall; a mother's secret hope outlives them all.",
-    "author": "Oliver Wendell Holmes"
+    "id": "motherhood-lifted-high",
+    "image": "/static/photos/277753206cb5ca6d744b336a483f509b.jpg",
+    "caption": "In her arms, even the sky feels within reach.",
+    "category": "Little Moments"
   },
   {
-    "quote": "Motherhood is the exquisite inconvenience of being another person's everything.",
-    "author": "Unknown"
+    "id": "motherhood-by-the-sea",
+    "image": "/static/photos/2f1816d0d889e4aade928900632aa3f0.jpg",
+    "caption": "The best memories are made one small step at a time.",
+    "category": "Growing Together"
   },
   {
-    "quote": "To describe my mother would be to write about a hurricane in its perfect power. Or the climbing, falling colors of a rainbow.",
-    "author": "Maya Angelou"
+    "id": "motherhood-golden-hour",
+    "image": "/static/photos/549d5e49e8d0a2356648a31ff9796779.jpg",
+    "caption": "Her love is the light that stays long after sunset.",
+    "category": "A Mother's Love"
   },
   {
-    "quote": "There is no way to be a perfect mother, and a million ways to be a good one.",
-    "author": "Jill Churchill"
+    "id": "motherhood-tender-guidance",
+    "image": "/static/photos/7225a0f36265f7e124eb843bfbc62f5a.jpg",
+    "caption": "A gentle hand can teach a heart to be brave.",
+    "category": "Growing Together"
   },
   {
-    "quote": "A mother is one who can take the place of all others but whose place no one else can take.",
-    "author": "Cardinal Mermillod"
+    "id": "motherhood-on-the-horizon",
+    "image": "/static/photos/bd09eced6b4c4c054bbefc9ec8de86d3.jpg",
+    "caption": "Every little journey is brighter when shared with love.",
+    "category": "Little Moments"
   },
   {
-    "quote": "Motherhood is a choice you make everyday, to put someone else's happiness and well-being ahead of your own.",
-    "author": "Donna Ball"
+    "id": "motherhood-vintage-embrace",
+    "image": "/static/photos/mother-child-vintage-public-domain.jpg",
+    "caption": "A mother's embrace is a home the heart can always find.",
+    "category": "A Mother's Love",
+    "author": "Mikuláš Galanda · public domain"
+  },
+  {
+    "id": "motherhood-mary-cassatt",
+    "image": "/static/photos/mother-young-sewing-mary-cassatt.jpg",
+    "caption": "Love lives in the quiet care we give each day.",
+    "category": "Little Moments",
+    "author": "Image: Gandalf's Gallery · CC BY-SA 2.0"
   }
 ]
