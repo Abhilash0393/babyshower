@@ -221,17 +221,18 @@
       audio.src = data.music_url || "";
     }
     button.disabled = !available || !musicAllowed;
-    button.textContent = audio.paused ? "Enable Music" : "Disable Music";
+    button.setAttribute("aria-label", audio.paused ? "Enable music" : "Pause music");
+    button.title = audio.paused ? "Enable music" : "Pause music";
     if (!available) {
       $("audioStatus").textContent = "Optional music is not configured.";
     } else if (!musicAllowed) {
       audio.pause();
       $("audioStatus").textContent = "Music is disabled in the admin controls.";
     } else if (!musicReady) {
-      $("audioStatus").textContent = "Music is ready. Tap Enable Music to start playback.";
+      $("audioStatus").textContent = "Music is ready. Use the bottom music control to start playback.";
     } else if (audio.paused && !userPausedMusic) {
       audio.play().catch(() => {
-        $("audioStatus").textContent = "Tap Enable Music to allow audio playback.";
+        $("audioStatus").textContent = "Use the bottom music control to allow audio playback.";
       });
     }
   }
@@ -309,14 +310,16 @@
       try {
         await audio.play();
         $("audioStatus").textContent = "Music is playing.";
-        $("toggleMusicButton").textContent = "Disable Music";
+        $("toggleMusicButton").setAttribute("aria-label", "Pause music");
+        $("toggleMusicButton").title = "Pause music";
       } catch (error) {
         $("audioStatus").textContent = "Music could not start. Check the configured audio file.";
       }
     } else {
       audio.pause();
       userPausedMusic = true;
-      $("toggleMusicButton").textContent = "Enable Music";
+      $("toggleMusicButton").setAttribute("aria-label", "Enable music");
+      $("toggleMusicButton").title = "Enable music";
       $("audioStatus").textContent = "Music is paused on this display.";
     }
   });

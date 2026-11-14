@@ -37,7 +37,7 @@ Run the unit and route tests with `python -m pytest`.
 | Route | Purpose |
 |---|---|
 | `/` | Redirects to QR voting |
-| `/invite`, `/invite/calendar.ics`, `/invite/cover.png` | Invitation, all-day calendar file, and social-preview artwork |
+| `/invite`, `/invite/calendar.ics`, `/invite/cover.png` | Interactive invitation, calendar file, and 1200 x 630 social-preview image |
 | `/vote?mode=qr`, `/vote?mode=booth` | QR and touchscreen voting |
 | `/display` | Live results and motherhood slideshow |
 | `/admin` | Authenticated event and display controls |
@@ -50,9 +50,9 @@ Run the unit and route tests with `python -m pytest`.
 
 ## Event configuration
 
-The invitation details are configurable through `.env`. The provided defaults are Monica's Baby Shower, 22 November 2026, at Hotel Highland. `EVENT_DATE` must use `YYYY-MM-DD`; the calendar download is an all-day event because no time was supplied. Do not add a time unless the family confirms one. `EVENT_DIRECTIONS_QUERY` defaults to Hotel Highland; set it to the confirmed full venue address if needed. No RSVP feature is provided.
+The invitation at `/invite` displays the supplied 768 x 1152 artwork unchanged, including its wording, layout, and QR code. A full-height kolam frame encloses the artwork and the **Add to Calendar**, **Get Directions**, and **Share on WhatsApp** actions. WhatsApp and other link previews use a 1200 x 630 Open Graph image combining the original artwork with readable event details; tapping the preview opens `/invite`, the interactive HTML page. Use the public HTTPS `/invite` URL when sharing; WhatsApp cannot generate a rich image preview from a localhost or private-network URL. `/invite/cover.png` serves the social preview, while `/static/images/invitation-reference.png` remains the unchanged artwork. Set `PUBLIC_BASE_URL` to the canonical public HTTPS origin before deployment so the page metadata contains public absolute URLs.
 
-The invitation at `/invite` includes an Add to Calendar download, Google Maps directions, WhatsApp sharing, and a configurable Open Graph cover image at `/invite/cover.png`. Voting is not offered on the invitation page; guests can use the separate QR and booth voting pages.
+Voting is not offered on the invitation page; guests can use the separate QR and booth voting pages.
 
 ## Motherhood slideshow
 
@@ -76,7 +76,9 @@ Private photographs are excluded from Git by default. For deployment, copy them 
 
 ## Background music
 
-The display uses the workspace's India drums, tabla, and sitar instrumental by default; its filename credits Alex Morgan. Its tuning is not documented, so no 455 Hz or 777 Hz claim is made. Tap **Enable Music** on the display to start playback because browsers may block autoplay. You can replace it with an MP3, OGG, or WAV that you supplied or are licensed to use by setting `DISPLAY_MUSIC_FILE` in the private `.env`; leave it empty to disable music. Missing or invalid audio does not interrupt slides or results.
+The display uses the workspace's India drums, tabla, and sitar instrumental by default; its filename credits Alex Morgan. Its tuning is not documented, so no 455 Hz or 777 Hz claim is made. Music is allowed or disabled in `/admin`; browser autoplay restrictions may require one tap on the discreet music control revealed by hovering at the bottom of `/display`. You can replace it with an MP3, OGG, or WAV that you supplied or are licensed to use by setting `DISPLAY_MUSIC_FILE` in the private `.env`; leave it empty to disable music. Missing or invalid audio does not interrupt slides or results.
+
+The display fills the browser tab with the slideshow or results, with kolam decoration limited to a narrow border. Use browser full-screen mode when sharing the display tab on a projector.
 
 The prediction meter emphasizes the live percentage split while retaining individual and total vote counts. Before any votes are cast, it shows a clearly labeled even 50/50 starting split without recording placeholder votes.
 
@@ -115,7 +117,7 @@ For a small event, PythonAnywhere's free Beginner account can host this Flask ap
    ```
 
 5. Create `~/babyshower/.env` on the host (never commit it) and set a fresh `SECRET_KEY`, a unique `ADMIN_PIN`, `PUBLIC_BASE_URL=https://<username>.pythonanywhere.com`, `COOKIE_SECURE=1`, and `DATABASE_PATH=instance/baby_votes.sqlite3`. The database then lives under the persistent project directory.
-   Also set `EVENT_TITLE`, `EVENT_DATE=2026-11-22`, `EVENT_VENUE=Hotel Highland`, and `EVENT_DIRECTIONS_QUERY` to the confirmed event details. Leave `DISPLAY_MUSIC_FILE` empty unless you upload licensed audio.
+   Also set `EVENT_TITLE`, `EVENT_DATE=2026-11-22`, `EVENT_TIME`, `EVENT_VENUE`, and `EVENT_DIRECTIONS_QUERY` to the confirmed event details. Leave `DISPLAY_MUSIC_FILE` empty unless you upload licensed audio.
 6. Reload the web app, verify `/health`, `/invite`, both vote modes, `/admin`, and `/display`. Download the QR image from `/qr.png` only after confirming the deployed HTTPS URL. The deployed database is created empty; local SQLite files are excluded from Git.
 7. When ready to start collecting votes, use the admin controls to ensure voting is open. If you cast test votes during verification, reset them from `/admin` before sharing the QR code.
 
@@ -130,7 +132,7 @@ For code updates after the first deployment, push your changes to GitHub, then i
 - `PUBLIC_BASE_URL`: the deployed HTTPS origin, e.g. `https://<username>.pythonanywhere.com`.
 - `DATABASE_PATH`: a database path under the persistent home directory.
 - `COOKIE_SECURE`: `1` when using HTTPS.
-- `EVENT_TITLE`, `EVENT_DATE`, `EVENT_VENUE`, `EVENT_DIRECTIONS_QUERY`: invitation settings.
+- `EVENT_TITLE`, `EVENT_DATE`, `EVENT_TIME`, `EVENT_VENUE`, `EVENT_DIRECTIONS_QUERY`: event, preview, and calendar settings. The printed invitation artwork is supplied as a static image.
 - `DISPLAY_MUSIC_FILE`: optional filename under `static/music/`; leave empty by default.
 
 `PUBLIC_BASE_URL` must use HTTPS, and the app refuses to start with a configured public URL unless `SECRET_KEY`, `ADMIN_PIN`, and `COOKIE_SECURE=1` are set.

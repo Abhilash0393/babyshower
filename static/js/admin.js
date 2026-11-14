@@ -87,7 +87,7 @@
     $("musicEnabled").checked = Boolean(data.music_enabled);
     $("musicEnabled").disabled = !musicAvailable;
     $("musicAvailability").textContent = musicAvailable
-      ? "A local music file is configured. Playback may still require a tap on the display."
+      ? "A local music file is configured. Playback may require one tap on the discreet music control at the bottom of the display."
       : "No licensed music file is configured; the display remains silent.";
     renderSlideList();
   }

@@ -10,10 +10,7 @@
 <body class="display-body">
   <main class="display-root">
     <div class="kolam-frame" aria-hidden="true"></div>
-    <header class="display-header">
-      <span>{{ event_title|upper }}</span>
-      <span id="connectionStatus" role="status" aria-live="polite">● CONNECTING</span>
-    </header>
+    <span id="connectionStatus" class="sr-only" role="status" aria-live="polite">CONNECTING</span>
     <section class="slideshow-view" id="slideshowView" aria-label="Family photo slideshow">
       <div class="photo-frame">
         <div class="photo-placeholder" id="photoPlaceholder">
@@ -28,12 +25,6 @@
           <span class="photo-author" id="captionAuthor"></span>
         </div>
       </div>
-      <div class="display-controls">
-        <button class="enable-audio" id="toggleMusicButton" type="button">Enable Music</button>
-        <span id="slideshowState" class="display-audio-status" role="status" aria-live="polite"></span>
-      </div>
-      <p class="music-credit">India drums · tabla · sitar · Track credited to Alex Morgan</p>
-      <p id="audioStatus" class="display-audio-status" role="status" aria-live="polite"></p>
     </section>
     <section class="meter-view hidden" id="meterView" aria-label="Live prediction meter">
       <p class="eyebrow">A LITTLE GUESS, A LOT OF LOVE</p>
@@ -59,6 +50,13 @@
       <p class="eyebrow">A SPECIAL MESSAGE</p>
       <h1 id="specialMessage">A little more love is on the way</h1>
     </section>
+    <div class="display-controls">
+      <button class="display-music-toggle" id="toggleMusicButton" type="button" aria-label="Enable music" title="Enable music">
+        <span aria-hidden="true">♫</span>
+      </button>
+      <span id="slideshowState" class="sr-only" role="status" aria-live="polite"></span>
+    </div>
+    <p id="audioStatus" class="sr-only" role="status" aria-live="polite"></p>
     <audio id="backgroundMusic" loop preload="none"></audio>
     <div class="display-toast" id="displayToast" role="status" aria-live="polite"></div>
   </main>

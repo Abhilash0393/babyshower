@@ -53,9 +53,11 @@ def create_app(test_config=None):
         ))),
         EVENT_TITLE=os.getenv("EVENT_TITLE", "Monica's Baby Shower"),
         EVENT_DATE=os.getenv("EVENT_DATE", "2026-11-22"),
-        EVENT_VENUE=os.getenv("EVENT_VENUE", "Hotel Highland"),
+        EVENT_VENUE=os.getenv("EVENT_VENUE", "Highland Hotel"),
+        EVENT_TIME=os.getenv("EVENT_TIME", "11:00 AM onwards"),
         EVENT_DIRECTIONS_QUERY=os.getenv(
-            "EVENT_DIRECTIONS_QUERY", "Hotel Highland"
+            "EVENT_DIRECTIONS_QUERY",
+            "Highland Hotel, Opp. Sapthagiri College, Chikkasandra",
         ),
         PHOTO_DIR=str(Path(app.static_folder) / "photos"),
         PHOTO_MANIFEST_PATH=os.getenv(
@@ -257,89 +259,6 @@ def create_app(test_config=None):
             session["csrf_token"] = token
         return token
 
-    def invitation_cover():
-        image = Image.new("RGB", (1200, 630), "#fffaf0")
-        draw = ImageDraw.Draw(image)
-        maroon, brass, leaf = "#702b3b", "#ad8542", "#71856a"
-        draw.rounded_rectangle((24, 24, 1176, 606), radius=30, outline=brass, width=4)
-        draw.rounded_rectangle((40, 40, 1160, 590), radius=24, outline="#dfd1b4", width=2)
-        for center_y in (120, 540):
-            for radius in (13, 24, 35):
-                draw.ellipse(
-                    (600-radius, center_y-radius, 600+radius, center_y+radius),
-                    outline=brass,
-                    width=3,
-                )
-            draw.polygon(
-                ((600, center_y-23), (623, center_y), (600, center_y+23), (577, center_y)),
-                outline=leaf,
-                width=3,
-            )
-            for offset_x, offset_y in ((0, -44), (44, 0), (0, 44), (-44, 0)):
-                draw.ellipse(
-                    (600+offset_x-4, center_y+offset_y-4,
-                     600+offset_x+4, center_y+offset_y+4),
-                    fill=leaf,
-                )
-
-        font_paths = (
-            "C:/Windows/Fonts/georgia.ttf",
-            "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
-            "DejaVuSerif.ttf",
-        )
-        font_path = next((path for path in font_paths if Path(path).is_file()), None)
-        font_size = 48
-        font = (
-            ImageFont.truetype(font_path, font_size)
-            if font_path
-            else ImageFont.load_default()
-        )
-        small_font_paths = (
-            "C:/Windows/Fonts/arial.ttf",
-            "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-            "DejaVuSans.ttf",
-        )
-        small_font_path = next(
-            (path for path in small_font_paths if Path(path).is_file()), None
-        )
-        small_font = (
-            ImageFont.truetype(small_font_path, 22)
-            if small_font_path
-            else ImageFont.load_default()
-        )
-
-        def centered(text, y, selected_font, color):
-            bounds = draw.textbbox((0, 0), text, font=selected_font)
-            text_width = bounds[2] - bounds[0]
-            draw.text(((1200 - text_width) / 2, y), text, font=selected_font, fill=color)
-
-        centered("A NEW CHAPTER BEGINS", 174, small_font, leaf)
-        title = app.config["EVENT_TITLE"].upper()
-        title_bounds = draw.textbbox((0, 0), title, font=font)
-        while title_bounds[2] - title_bounds[0] > 1080 and font_path and font_size > 28:
-            font_size -= 2
-            font = ImageFont.truetype(font_path, font_size)
-            title_bounds = draw.textbbox((0, 0), title, font=font)
-        centered(title, 220, font, maroon)
-        draw.line((330, 300, 870, 300), fill=brass, width=2)
-        centered(
-            "Join us for a day filled with blessings, love and family.",
-            326,
-            small_font,
-            "#766766",
-        )
-        centered(
-            f"{event_date.strftime('%d %B')}  |  {app.config['EVENT_VENUE']}",
-            382,
-            small_font,
-            maroon,
-        )
-        centered("One little mystery. Two big possibilities.", 428, small_font, brass)
-        output = BytesIO()
-        image.save(output, format="PNG", optimize=True)
-        output.seek(0)
-        return output
-
     @app.context_processor
     def template_security_context():
         return {"csrf_token": csrf_token()}
@@ -521,37 +440,136 @@ def create_app(test_config=None):
         base_url = (
             app.config["PUBLIC_BASE_URL"] or request.url_root.rstrip("/")
         )
-        invite_url = f"{base_url}{url_for('invite')}"
+        invite_url = f"{base_url}{url_for('invite')}?v=3"
+        cover_url = f"{base_url}{url_for('invite_cover')}?v=3"
         directions_url = (
             "https://www.google.com/maps/dir/?api=1&destination="
             + quote(app.config["EVENT_DIRECTIONS_QUERY"], safe="")
         )
         share_text = (
-            f"A new chapter begins — {app.config['EVENT_TITLE']}! "
-            f"Join us on {event_date.strftime('%d %B')} at "
-            f"{app.config['EVENT_VENUE']}. Come celebrate with us! {invite_url}"
+            f"You're invited to {app.config['EVENT_TITLE']} on "
+            f"{event_date.strftime('%d %B %Y')} at {app.config['EVENT_VENUE']}. "
+            f"Open the invitation and see you there: {invite_url}"
         )
-        cover_url = f"{base_url}{url_for('invite_cover')}"
         return render_template(
             "invite.html",
             event_title=app.config["EVENT_TITLE"],
-            event_date=event_date.strftime("%d %B"),
-            event_venue=app.config["EVENT_VENUE"],
             invite_url=invite_url,
+            cover_url=cover_url,
+            share_title="Monica & Abhilash | Baby Shower Celebration",
+            share_description=(
+                "Join us to celebrate the arrival of our little one. Your love, "
+                "blessings and presence will make this occasion special."
+            ),
             directions_url=directions_url,
             whatsapp_url="https://wa.me/?text=" + quote(share_text, safe=""),
-            cover_url=cover_url,
-            share_description=(
-                "Join us for a day filled with blessings, love and family."
-            ),
         )
+
+    @app.get("/invite/directions-qr.png")
+    def invite_directions_qr():
+        directions_url = (
+            "https://www.google.com/maps/dir/?api=1&destination="
+            + quote(app.config["EVENT_DIRECTIONS_QUERY"], safe="")
+        )
+        image = qrcode.make(directions_url)
+        buffer = BytesIO()
+        image.save(buffer, format="PNG")
+        buffer.seek(0)
+        return send_file(buffer, mimetype="image/png", max_age=3600)
 
     @app.get("/invite/cover.png")
     def invite_cover():
+        preview = Image.new("RGB", (1200, 630), "#641b2d")
+        draw = ImageDraw.Draw(preview)
+        draw.rounded_rectangle(
+            (12, 12, 1188, 618), radius=26, fill="#6d2034",
+            outline="#d3b46e", width=4,
+        )
+        draw.rounded_rectangle(
+            (475, 34, 1167, 596), radius=22, fill="#fff8e9",
+            outline="#d3b46e", width=3,
+        )
+
+        artwork_path = Path(app.static_folder) / "images" / "invitation-reference.png"
+        with Image.open(artwork_path) as artwork:
+            artwork = artwork.convert("RGB")
+            artwork.thumbnail((420, 590), Image.Resampling.LANCZOS)
+            artwork_x = (455 - artwork.width) // 2
+            artwork_y = (630 - artwork.height) // 2
+            preview.paste(artwork, (artwork_x, artwork_y))
+
+        title_font_paths = (
+            "C:/Windows/Fonts/georgiab.ttf",
+            "C:/Windows/Fonts/georgia.ttf",
+            "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+            "DejaVuSerif.ttf",
+        )
+        body_font_paths = (
+            "C:/Windows/Fonts/arial.ttf",
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+            "DejaVuSans.ttf",
+        )
+
+        def find_font(paths, size):
+            font_path = next((path for path in paths if Path(path).is_file()), None)
+            return ImageFont.truetype(font_path, size) if font_path else ImageFont.load_default()
+
+        title_font = find_font(title_font_paths, 44)
+        heading_font = find_font(title_font_paths, 34)
+        detail_font = find_font(body_font_paths, 23)
+        small_font = find_font(body_font_paths, 19)
+        maroon = "#702b3b"
+        leaf = "#64764d"
+        text_x = 520
+        text_width = 600
+
+        def draw_wrapped(text, y, font, fill, spacing=7):
+            lines = []
+            line = ""
+            for word in text.split():
+                candidate = f"{line} {word}".strip()
+                if line and draw.textlength(candidate, font=font) > text_width:
+                    lines.append(line)
+                    line = word
+                else:
+                    line = candidate
+            if line:
+                lines.append(line)
+            draw.multiline_text(
+                (text_x, y), "\n".join(lines), font=font, fill=fill, spacing=spacing
+            )
+            line_height = draw.textbbox((0, 0), "Ag", font=font)[3]
+            return y + len(lines) * (line_height + spacing)
+
+        draw.text((text_x, 72), "Monica & Abhilash", font=title_font, fill=maroon)
+        draw.line((text_x, 132, 1128, 132), fill="#ad8542", width=2)
+        draw.text(
+            (text_x, 156), "Baby Shower Celebration", font=heading_font, fill=maroon
+        )
+        y = draw_wrapped(
+            "Join us to celebrate the arrival of our little one.",
+            215, detail_font, "#3a2b2b",
+        )
+        draw.line((text_x, y + 10, 1128, y + 10), fill="#dfd1b4", width=2)
+        date_text = f"{event_date.strftime('%A, %d %B %Y')}  ·  {app.config['EVENT_TIME']}"
+        y = draw_wrapped(date_text, y + 30, small_font, maroon, spacing=5)
+        y = draw_wrapped(app.config["EVENT_VENUE"], y + 12, detail_font, maroon)
+        draw_wrapped(
+            app.config["EVENT_DIRECTIONS_QUERY"], y + 2, small_font, leaf, spacing=5
+        )
+        draw.line((text_x, 548, 1128, 548), fill="#ad8542", width=2)
+        draw.text(
+            (text_x, 558), "Your love, blessings and presence will make this day special.",
+            font=small_font, fill=maroon,
+        )
+
+        output = BytesIO()
+        preview.save(output, format="PNG", optimize=True)
+        output.seek(0)
         return send_file(
-            invitation_cover(),
+            output,
             mimetype="image/png",
-            download_name="monicas-baby-shower-invitation.png",
+            download_name="monicas-baby-shower-preview.png",
             max_age=3600,
         )
 
