@@ -13,7 +13,7 @@
   <meta property="og:image:type" content="image/png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="Baby shower invitation for Monica and Abhilash">
+  <meta property="og:image:alt" content="Kolam-framed baby shower invitation for Monica and Abhilash">
   <meta property="og:type" content="website">
   <meta property="og:url" content="{{ invite_url }}">
   <meta name="twitter:card" content="summary_large_image">
@@ -21,7 +21,7 @@
   <meta name="twitter:description" content="{{ share_description }}">
   <meta name="twitter:image" content="{{ cover_url }}">
   <title>{{ event_title }} · Invitation</title>
-  <link rel="stylesheet" href="/static/css/app.css?v=invite-card-5">
+  <link rel="stylesheet" href="/static/css/app.css?v=invite-card-8">
 </head>
 <body class="invite-body">
   <main class="invite-wrap">
@@ -37,25 +37,84 @@
         <img class="invite-kolam-corner invite-kolam-bottom-left" src="/static/images/kolam-corner.svg" alt="">
       </div>
       <div class="invite-card">
-        <img
-          class="invite-image"
-          src="/static/images/invitation-reference.png?v=3"
-          alt="Baby shower invitation for Monica and Abhilash"
-          width="768"
-          height="1152"
-        >
+        <header class="invite-intro">
+          <img class="invite-thoranam" src="/static/images/mango-thoranam.svg" alt="">
+          <img class="invite-floral" src="/static/images/invite-floral.svg" alt="">
+          <svg class="invite-lotus" viewBox="0 0 72 46" aria-hidden="true">
+            <path d="M36 40C24 31 22 20 36 7c14 13 12 24 0 33Z" />
+            <path d="M35 39C20 37 12 29 13 17c13 2 21 9 22 22ZM37 39c15-2 23-10 22-22-13 2-21 9-22 22ZM35 40C25 43 18 42 13 38M37 40c10 3 17 2 22-2M36 40v-2" />
+          </svg>
+          <h1 class="invite-names">Monica &amp; Abhilash</h1>
+          <span class="invite-rule" aria-hidden="true"></span>
+          <p class="invite-message">Cordially invite you to join us in love and laughter, and seek your blessings as our family joyfully grows to four.</p>
+          <img class="invite-divider" src="/static/images/mango-thoranam.svg" alt="">
+          <h2 class="invite-heading">Baby Shower</h2>
+          <span class="invite-heading-rule" aria-hidden="true"></span>
+        </header>
+
+        <section class="invite-event" aria-label="Event details and directions">
+          <figure class="invite-couple">
+            <img
+              class="invite-couple-photo"
+              src="/static/images/invite-couple.png"
+              alt="Illustration of the parents-to-be"
+              width="274"
+              height="410"
+            >
+          </figure>
+          <div class="invite-event-details">
+            <p class="invite-detail">
+              <span class="invite-detail-icon" aria-hidden="true">▦</span>
+              <time datetime="{{ event_date_iso }}">{{ display_event_date }}</time>
+            </p>
+            <p class="invite-detail">
+              <span class="invite-detail-icon" aria-hidden="true">◷</span>
+              <span>{{ event_time }}</span>
+            </p>
+            <div class="invite-detail invite-venue">
+              <span class="invite-detail-icon" aria-hidden="true">⌖</span>
+              <p><strong>{{ event_venue }},</strong><br>Opp. Sapthagiri College,<br>Chikkasandra.</p>
+            </div>
+            <figure class="invite-qr">
+              <img src="{{ directions_qr_url }}" alt="Scan this QR code for directions to Highland Hotel">
+              <figcaption>Scan for directions</figcaption>
+            </figure>
+          </div>
+        </section>
+
+        <footer class="invite-closing">
+          <span class="invite-heart" aria-hidden="true">♡</span>
+          <p>Your love and blessings mean the world to us.</p>
+          <p>Looking forward to welcoming you —</p>
+          <strong>Shaarrvi Agamya</strong>
+        </footer>
       </div>
       <nav class="invite-actions" aria-label="Invitation actions">
         <a class="invite-action invite-action-calendar" href="/invite/calendar.ics">
-          <span class="invite-action-icon" aria-hidden="true">▦</span>
+          <span class="invite-action-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <rect x="3" y="5" width="18" height="16" rx="2"></rect>
+              <path d="M16 3v4M8 3v4M3 10h18M8 14h2M14 14h2M8 17h2"></path>
+            </svg>
+          </span>
           Add to Calendar
         </a>
         <a class="invite-action invite-action-directions" href="{{ directions_url }}" target="_blank" rel="noopener">
-          <span class="invite-action-icon" aria-hidden="true">⌖</span>
+          <span class="invite-action-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"></path>
+              <circle cx="12" cy="10" r="2.5"></circle>
+            </svg>
+          </span>
           Get Directions
         </a>
         <a class="invite-action invite-action-whatsapp" href="{{ whatsapp_url }}" target="_blank" rel="noopener">
-          <span class="invite-action-icon" aria-hidden="true">↗</span>
+          <span class="invite-action-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M20.5 11.6a8.4 8.4 0 0 1-12.4 7.3L3 20l1.2-4.9a8.4 8.4 0 1 1 16.3-3.5Z"></path>
+              <path d="M8.6 8.3c.2-.5.4-.5.7-.5h.5c.2 0 .4.1.5.4l.7 1.7c.1.3.1.5-.1.7l-.5.6c-.2.2-.2.4 0 .7.5.9 1.3 1.7 2.2 2.2.3.2.5.2.7 0l.7-.8c.2-.2.4-.3.7-.2l1.6.8c.3.1.4.3.4.5 0 .3-.2 1.2-.7 1.6-.5.5-1.2.7-2 .6-1.1-.2-2.5-.9-3.8-2.1-1.1-1-2-2.3-2.3-3.3-.3-1 .1-1.9.4-2.3Z"></path>
+            </svg>
+          </span>
           Share on WhatsApp
         </a>
       </nav>

@@ -19,6 +19,7 @@ load_dotenv(ROOT / ".env")
 PHOTO_EXTENSIONS = {".avif", ".gif", ".jpeg", ".jpg", ".png", ".webp"}
 LOGIN_WINDOW = timedelta(minutes=15)
 LOGIN_ATTEMPT_LIMIT = 5
+INVITE_VERSION = "5"
 
 
 def configured_database_path(value):
@@ -28,6 +29,14 @@ def configured_database_path(value):
 
 def utc_now():
     return datetime.now(timezone.utc).isoformat()
+
+
+def format_display_date(value):
+    day = value.day
+    ordinal = "th" if 11 <= day % 100 <= 13 else {
+        1: "st", 2: "nd", 3: "rd"
+    }.get(day % 10, "th")
+    return f"{value.strftime('%A')}, {day}{ordinal} {value.strftime('%B')}"
 
 
 def create_app(test_config=None):
@@ -440,22 +449,37 @@ def create_app(test_config=None):
         base_url = (
             app.config["PUBLIC_BASE_URL"] or request.url_root.rstrip("/")
         )
-        invite_url = f"{base_url}{url_for('invite')}?v=3"
-        cover_url = f"{base_url}{url_for('invite_cover')}?v=3"
+        invite_url = f"{base_url}{url_for('invite')}?v={INVITE_VERSION}"
+        short_invite_url = (
+            f"{base_url}{url_for('invite_short')}?v={INVITE_VERSION}"
+        )
+        cover_url = (
+            f"{base_url}{url_for('invite_cover')}?v={INVITE_VERSION}"
+        )
         directions_url = (
             "https://www.google.com/maps/dir/?api=1&destination="
             + quote(app.config["EVENT_DIRECTIONS_QUERY"], safe="")
         )
+        day = event_date.day
+        ordinal = "th" if 11 <= day % 100 <= 13 else {
+            1: "st", 2: "nd", 3: "rd"
+        }.get(day % 10, "th")
+        display_event_date = format_display_date(event_date)
         share_text = (
-            f"You're invited to {app.config['EVENT_TITLE']} on "
-            f"{event_date.strftime('%d %B %Y')} at {app.config['EVENT_VENUE']}. "
-            f"Open the invitation and see you there: {invite_url}"
+            "You're invited to celebrate Monica & Abhilash's Baby Shower "
+            f"on {day}{ordinal} {event_date.strftime('%B')} at "
+            f"{app.config['EVENT_VENUE']}.\n\n"
+            f"Join us and bless our growing family!\n\n{short_invite_url}"
         )
         return render_template(
             "invite.html",
             event_title=app.config["EVENT_TITLE"],
             invite_url=invite_url,
             cover_url=cover_url,
+            event_date_iso=event_date.isoformat(),
+            display_event_date=display_event_date,
+            event_time=app.config["EVENT_TIME"],
+            event_venue=app.config["EVENT_VENUE"],
             share_title="Monica & Abhilash | Baby Shower Celebration",
             share_description=(
                 "Join us to celebrate the arrival of our little one. Your love, "
@@ -463,7 +487,12 @@ def create_app(test_config=None):
             ),
             directions_url=directions_url,
             whatsapp_url="https://wa.me/?text=" + quote(share_text, safe=""),
+            directions_qr_url=url_for("invite_directions_qr"),
         )
+
+    @app.get("/i")
+    def invite_short():
+        return redirect(url_for("invite", v=INVITE_VERSION), code=302)
 
     @app.get("/invite/directions-qr.png")
     def invite_directions_qr():
@@ -486,17 +515,15 @@ def create_app(test_config=None):
             outline="#d3b46e", width=4,
         )
         draw.rounded_rectangle(
-            (475, 34, 1167, 596), radius=22, fill="#fff8e9",
+            (448, 34, 1167, 596), radius=22, fill="#fff8e9",
             outline="#d3b46e", width=3,
         )
 
-        artwork_path = Path(app.static_folder) / "images" / "invitation-reference.png"
-        with Image.open(artwork_path) as artwork:
-            artwork = artwork.convert("RGB")
-            artwork.thumbnail((420, 590), Image.Resampling.LANCZOS)
-            artwork_x = (455 - artwork.width) // 2
-            artwork_y = (630 - artwork.height) // 2
-            preview.paste(artwork, (artwork_x, artwork_y))
+        photo_path = Path(app.static_folder) / "images" / "invite-couple.png"
+        with Image.open(photo_path) as photo:
+            photo = photo.convert("RGBA")
+            photo.thumbnail((290, 480), Image.Resampling.LANCZOS)
+            preview.paste(photo, (28, 72), photo)
 
         title_font_paths = (
             "C:/Windows/Fonts/georgiab.ttf",
@@ -504,24 +531,26 @@ def create_app(test_config=None):
             "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
             "DejaVuSerif.ttf",
         )
-        body_font_paths = (
-            "C:/Windows/Fonts/arial.ttf",
-            "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-            "DejaVuSans.ttf",
+        italic_font_paths = (
+            "C:/Windows/Fonts/georgiai.ttf",
+            "C:/Windows/Fonts/georgia.ttf",
+            "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Italic.ttf",
+            "DejaVuSerif.ttf",
         )
-
         def find_font(paths, size):
             font_path = next((path for path in paths if Path(path).is_file()), None)
             return ImageFont.truetype(font_path, size) if font_path else ImageFont.load_default()
 
         title_font = find_font(title_font_paths, 44)
-        heading_font = find_font(title_font_paths, 34)
-        detail_font = find_font(body_font_paths, 23)
-        small_font = find_font(body_font_paths, 19)
+        heading_font = find_font(title_font_paths, 38)
+        message_font = find_font(title_font_paths, 24)
+        detail_font = find_font(title_font_paths, 25)
+        small_font = find_font(title_font_paths, 21)
+        closing_font = find_font(italic_font_paths, 21)
         maroon = "#702b3b"
         leaf = "#64764d"
-        text_x = 520
-        text_width = 600
+        text_x = 490
+        text_width = 640
 
         def draw_wrapped(text, y, font, fill, spacing=7):
             lines = []
@@ -541,26 +570,36 @@ def create_app(test_config=None):
             line_height = draw.textbbox((0, 0), "Ag", font=font)[3]
             return y + len(lines) * (line_height + spacing)
 
-        draw.text((text_x, 72), "Monica & Abhilash", font=title_font, fill=maroon)
-        draw.line((text_x, 132, 1128, 132), fill="#ad8542", width=2)
-        draw.text(
-            (text_x, 156), "Baby Shower Celebration", font=heading_font, fill=maroon
-        )
+        draw.text((text_x, 54), "Monica & Abhilash", font=title_font, fill=maroon)
+        draw.line((text_x, 112, 1128, 112), fill="#ad8542", width=2)
+        draw.text((text_x, 128), "Baby Shower Celebration", font=heading_font, fill=maroon)
         y = draw_wrapped(
-            "Join us to celebrate the arrival of our little one.",
-            215, detail_font, "#3a2b2b",
+            "Cordially invite you to join us in love and laughter, and seek your blessings as our family joyfully grows to four.",
+            184, message_font, leaf, spacing=5,
         )
-        draw.line((text_x, y + 10, 1128, y + 10), fill="#dfd1b4", width=2)
-        date_text = f"{event_date.strftime('%A, %d %B %Y')}  ·  {app.config['EVENT_TIME']}"
-        y = draw_wrapped(date_text, y + 30, small_font, maroon, spacing=5)
-        y = draw_wrapped(app.config["EVENT_VENUE"], y + 12, detail_font, maroon)
-        draw_wrapped(
-            app.config["EVENT_DIRECTIONS_QUERY"], y + 2, small_font, leaf, spacing=5
+        draw.line((text_x, y + 7, 1128, y + 7), fill="#dfd1b4", width=2)
+        y = draw_wrapped(
+            format_display_date(event_date), y + 20, small_font, maroon, spacing=4
         )
-        draw.line((text_x, 548, 1128, 548), fill="#ad8542", width=2)
+        y = draw_wrapped(app.config["EVENT_TIME"], y + 2, small_font, maroon, spacing=4)
+        y = draw_wrapped(app.config["EVENT_VENUE"], y + 4, detail_font, maroon)
+        y = draw_wrapped(
+            "Opp. Sapthagiri College, Chikkasandra.", y + 1, small_font, leaf, spacing=4
+        )
+        qr_url = (
+            "https://www.google.com/maps/dir/?api=1&destination="
+            + quote(app.config["EVENT_DIRECTIONS_QUERY"], safe="")
+        )
+        qr_image = qrcode.make(qr_url).convert("RGB")
+        qr_image.thumbnail((100, 100), Image.Resampling.NEAREST)
+        preview.paste(qr_image, (28, 505))
+        draw.text((text_x, 500), "Your love and blessings mean the world to us.",
+                  font=closing_font, fill=maroon)
+        draw.text((text_x, 528), "Looking forward to welcoming you —",
+                  font=closing_font, fill=maroon)
         draw.text(
-            (text_x, 558), "Your love, blessings and presence will make this day special.",
-            font=small_font, fill=maroon,
+            (text_x, 556), "Shaarrvi Agamya",
+            font=find_font(title_font_paths, 34), fill=maroon,
         )
 
         output = BytesIO()

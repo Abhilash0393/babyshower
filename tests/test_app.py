@@ -262,16 +262,40 @@ def test_invitation_has_configured_event_and_no_rsvp(client):
     assert b"og:image:secure_url" in response.data
     assert b"twitter:card" in response.data
     assert b'name="twitter:card" content="summary_large_image"' in response.data
-    assert b'<link rel="canonical" href="https://baby.example/invite?v=3">' in response.data
-    assert b'property="og:url" content="https://baby.example/invite?v=3"' in response.data
-    assert b'property="og:image" content="https://baby.example/invite/cover.png?v=3"' in response.data
+    assert b'<link rel="canonical" href="https://baby.example/invite?v=5">' in response.data
+    assert b'property="og:url" content="https://baby.example/invite?v=5"' in response.data
+    assert b'property="og:image" content="https://baby.example/invite/cover.png?v=5"' in response.data
     assert b"What is your prediction?" not in response.data
     assert b"Baby Girl" not in response.data
     assert b"Baby Boy" not in response.data
     assert b"/vote?mode=qr" not in response.data
-    assert b"/static/images/invitation-reference.png" in response.data
     assert b"invite-kolam-frame" in response.data
-    assert response.data.index(b'class="invite-image"') < response.data.index(
+    assert b'<svg viewBox="0 0 24 24">' in response.data
+    assert response.data.count(b'class="invite-action-icon"') == 3
+    assert b"Monica &amp; Abhilash" in response.data
+    assert (
+        b"Cordially invite you to join us in love and laughter, and seek your "
+        b"blessings as our family joyfully grows to four."
+    ) in response.data
+    assert b"Baby Shower</h2>" in response.data
+    assert b"Sunday, 22nd November" in response.data
+    assert b"11:00 AM onwards" in response.data
+    assert b"Highland Hotel," in response.data
+    assert b"Opp. Sapthagiri College," in response.data
+    assert b"Chikkasandra." in response.data
+    assert b'<time datetime="2026-11-22">Sunday, 22nd November</time>' in response.data
+    assert b"Your love and blessings mean the world to us." in response.data
+    assert b"Looking forward to welcoming you" in response.data
+    assert b"Shaarrvi Agamya" in response.data
+    styles = client.get("/static/css/app.css").data
+    assert b'font-family: "Cormorant Garamond"' in styles
+    assert b"/static/fonts/cormorant-garamond-latin-variable.woff2" in styles
+    assert client.get(
+        "/static/fonts/cormorant-garamond-latin-variable.woff2"
+    ).status_code == 200
+    assert b"/static/images/invite-couple.png" in response.data
+    assert b"/static/images/invite-floral.svg" in response.data
+    assert response.data.index(b'class="invite-couple-photo"') < response.data.index(
         b'class="invite-actions"'
     )
     assert b'href="/invite/calendar.ics"' in response.data
@@ -279,11 +303,14 @@ def test_invitation_has_configured_event_and_no_rsvp(client):
     assert b"Get Directions" in response.data
     assert b"Share on WhatsApp" in response.data
     assert b"google.com/maps/dir/" in response.data
-    cover = client.get("/invite/cover.png")
+    styles = client.get("/static/css/app.css?v=invite-card-8").data
+    assert b"border: 12px solid #6b0920" in styles
+    assert b"border-width: 9px" in styles
+    cover = client.get("/invite/cover.png?v=5")
     assert cover.mimetype == "image/png"
     assert cover.data.startswith(b"\x89PNG")
     assert struct.unpack(">II", cover.data[16:24]) == (1200, 630)
-    image = client.get("/static/images/invitation-reference.png")
+    image = client.get("/static/images/invite-couple.png")
     assert image.mimetype == "image/png"
     assert image.data.startswith(b"\x89PNG")
     assert cover.data != image.data
@@ -292,16 +319,27 @@ def test_invitation_has_configured_event_and_no_rsvp(client):
     assert directions_qr.data.startswith(b"\x89PNG")
 
 
-def test_invitation_only_shows_the_attached_artwork(client):
+def test_invitation_shares_one_short_link_and_preserves_directions(client):
     response = client.get("/invite")
-    assert response.data.count(b'class="invite-image"') == 1
-    assert b"invite-couple-art" not in response.data
+    assert response.data.count(b'class="invite-couple-photo"') == 1
     assert b'class="invite-actions"' in response.data
     whatsapp = re.search(rb'href="(https://wa\.me/\?text=[^"]+)"', response.data)
     assert whatsapp is not None
     share_text = unquote(whatsapp.group(1).decode())
-    assert "https://baby.example/invite?v=3" in share_text
-    assert "Monica's Baby Shower" in share_text
+    assert share_text.count("https://baby.example/i?v=5") == 1
+    assert "/invite?v=" not in share_text
+    assert "You're invited to celebrate Monica & Abhilash's Baby Shower on 22nd November at Highland Hotel." in share_text
+    assert "Join us and bless our growing family!" in share_text
+    short_link = client.get("/i?v=5", follow_redirects=False)
+    assert short_link.status_code == 302
+    assert short_link.headers["Location"] == "/invite?v=5"
+
+    directions = re.search(
+        rb'href="(https://www\.google\.com/maps/dir/\?api=1&amp;destination=[^"]+)"',
+        response.data,
+    )
+    assert directions is not None
+    assert "Highland%20Hotel" in directions.group(1).decode()
 
 
 def test_calendar_download_is_all_day_and_valid(client):
