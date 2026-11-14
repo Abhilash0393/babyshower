@@ -1,5 +1,7 @@
 import json
+import math
 import os
+import re
 import secrets
 import sqlite3
 from contextlib import contextmanager
@@ -37,6 +39,117 @@ def format_display_date(value):
         1: "st", 2: "nd", 3: "rd"
     }.get(day % 10, "th")
     return f"{value.strftime('%A')}, {day}{ordinal} {value.strftime('%B')}"
+
+
+def normalized_slide_layout(value):
+    layout = value if isinstance(value, dict) else {}
+    positions = {
+        "top-left", "top-right", "center-left", "center-right",
+        "bottom-left", "bottom-right", "center",
+    }
+    alignments = {"left", "center", "right"}
+    shadows = {"none", "light", "dark"}
+    overlays = {
+        "none", "left-light", "right-light", "top-light", "bottom-light",
+        "left-dark", "right-dark", "top-dark", "bottom-dark",
+    }
+    object_positions = {
+        f"{horizontal} {vertical}"
+        for horizontal in ("left", "center", "right")
+        for vertical in ("top", "center", "bottom")
+    }
+
+    def bounded_number(key, default, minimum, maximum):
+        candidate = layout.get(key, default)
+        if isinstance(candidate, bool) or not isinstance(candidate, (int, float)):
+            return default
+        try:
+            if not math.isfinite(candidate):
+                return default
+        except OverflowError:
+            return default
+        return min(maximum, max(minimum, candidate))
+
+    color = layout.get("color", "#fffaf0")
+    if not isinstance(color, str) or not re.fullmatch(r"#[0-9a-fA-F]{6}", color):
+        color = "#fffaf0"
+    position = layout.get("position")
+    alignment = layout.get("alignment")
+    shadow = layout.get("shadow")
+    overlay = layout.get("overlay")
+    font_family = layout.get("fontFamily")
+    object_position = layout.get("objectPosition")
+    subject_area = layout.get("subjectArea", {})
+    if not isinstance(subject_area, dict):
+        subject_area = {}
+
+    minimum_font = bounded_number("minFontPx", 20, 12, 72)
+    maximum_font = max(minimum_font, bounded_number("maxFontPx", 54, 18, 88))
+    safe_area = {
+        edge: bounded_number_from(subject_area.get(edge), fallback)
+        for edge, fallback in (("left", 0), ("top", 0), ("right", 100), ("bottom", 100))
+    }
+    if safe_area["right"] < safe_area["left"]:
+        safe_area["right"] = safe_area["left"]
+    if safe_area["bottom"] < safe_area["top"]:
+        safe_area["bottom"] = safe_area["top"]
+
+    return {
+        "position": (
+            position if isinstance(position, str) and position in positions else "center"
+        ),
+        "alignment": (
+            alignment if isinstance(alignment, str) and alignment in alignments else "center"
+        ),
+        "maxWidthPct": bounded_number("maxWidthPct", 48, 18, 80),
+        "mobileMaxWidthPct": bounded_number(
+            "mobileMaxWidthPct",
+            bounded_number("maxWidthPct", 48, 18, 80),
+            12,
+            80,
+        ),
+        "minFontPx": minimum_font,
+        "preferredFontVw": bounded_number("preferredFontVw", 3.2, 0.8, 8),
+        "maxFontPx": maximum_font,
+        "color": color,
+        "shadow": shadow if isinstance(shadow, str) and shadow in shadows else "dark",
+        "lineHeight": bounded_number("lineHeight", 1.15, 0.9, 1.8),
+        "paddingPx": bounded_number("paddingPx", 0, 0, 32),
+        "insetXVw": bounded_number("insetXVw", 5, 1, 15),
+        "insetYVh": bounded_number("insetYVh", 5, 1, 15),
+        "mobileInsetYVh": bounded_number(
+            "mobileInsetYVh",
+            bounded_number("insetYVh", 5, 1, 15),
+            1,
+            15,
+        ),
+        "overlay": (
+            overlay if isinstance(overlay, str) and overlay in overlays else "none"
+        ),
+        "fontFamily": (
+            font_family
+            if isinstance(font_family, str) and font_family in {"serif", "sans"}
+            else "serif"
+        ),
+        "fontWeight": int(bounded_number("fontWeight", 600, 300, 800)),
+        "objectPosition": (
+            object_position
+            if isinstance(object_position, str) and object_position in object_positions
+            else "center center"
+        ),
+        "subjectArea": safe_area,
+    }
+
+
+def bounded_number_from(value, default):
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return default
+    try:
+        if not math.isfinite(value):
+            return default
+    except OverflowError:
+        return default
+    return min(100, max(0, value))
 
 
 def create_app(test_config=None):
@@ -218,6 +331,7 @@ def create_app(test_config=None):
                 "caption": str(entry.get("caption", "")).strip()[:240],
                 "category": str(entry.get("category", "")).strip()[:80],
                 "author": str(entry.get("author", "")).strip()[:100],
+                "text_layout": normalized_slide_layout(entry.get("textLayout")),
             })
         return slides
 

@@ -21,7 +21,7 @@
   <meta name="twitter:description" content="{{ share_description }}">
   <meta name="twitter:image" content="{{ cover_url }}">
   <title>{{ event_title }} · Invitation</title>
-  <link rel="stylesheet" href="/static/css/app.css?v=invite-card-8">
+  <link rel="stylesheet" href="/static/css/app.css?v=invite-card-10">
 </head>
 <body class="invite-body">
   <main class="invite-wrap">
@@ -35,6 +35,8 @@
         <img class="invite-kolam-corner invite-kolam-top-right" src="/static/images/kolam-corner.svg" alt="">
         <img class="invite-kolam-corner invite-kolam-bottom-right" src="/static/images/kolam-corner.svg" alt="">
         <img class="invite-kolam-corner invite-kolam-bottom-left" src="/static/images/kolam-corner.svg" alt="">
+        <img class="invite-leaves invite-leaves-left" src="/static/images/invite-leaves.svg" alt="">
+        <img class="invite-leaves invite-leaves-right" src="/static/images/invite-leaves.svg" alt="">
       </div>
       <div class="invite-card">
         <header class="invite-intro">
@@ -88,36 +90,36 @@
           <p>Looking forward to welcoming you —</p>
           <strong>Shaarrvi Agamya</strong>
         </footer>
+        <nav class="invite-actions" aria-label="Invitation actions">
+          <a class="invite-action invite-action-calendar" href="/invite/calendar.ics">
+            <span class="invite-action-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <rect x="3" y="5" width="18" height="16" rx="2"></rect>
+                <path d="M16 3v4M8 3v4M3 10h18M8 14h2M14 14h2M8 17h2"></path>
+              </svg>
+            </span>
+            Add to Calendar
+          </a>
+          <a class="invite-action invite-action-directions" href="{{ directions_url }}" target="_blank" rel="noopener">
+            <span class="invite-action-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"></path>
+                <circle cx="12" cy="10" r="2.5"></circle>
+              </svg>
+            </span>
+            Get Directions
+          </a>
+          <a class="invite-action invite-action-whatsapp" href="{{ whatsapp_url }}" target="_blank" rel="noopener">
+            <span class="invite-action-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M20.5 11.6a8.4 8.4 0 0 1-12.4 7.3L3 20l1.2-4.9a8.4 8.4 0 1 1 16.3-3.5Z"></path>
+                <path d="M8.6 8.3c.2-.5.4-.5.7-.5h.5c.2 0 .4.1.5.4l.7 1.7c.1.3.1.5-.1.7l-.5.6c-.2.2-.2.4 0 .7.5.9 1.3 1.7 2.2 2.2.3.2.5.2.7 0l.7-.8c.2-.2.4-.3.7-.2l1.6.8c.3.1.4.3.4.5 0 .3-.2 1.2-.7 1.6-.5.5-1.2.7-2 .6-1.1-.2-2.5-.9-3.8-2.1-1.1-1-2-2.3-2.3-3.3-.3-1 .1-1.9.4-2.3Z"></path>
+              </svg>
+            </span>
+            Share on WhatsApp
+          </a>
+        </nav>
       </div>
-      <nav class="invite-actions" aria-label="Invitation actions">
-        <a class="invite-action invite-action-calendar" href="/invite/calendar.ics">
-          <span class="invite-action-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24">
-              <rect x="3" y="5" width="18" height="16" rx="2"></rect>
-              <path d="M16 3v4M8 3v4M3 10h18M8 14h2M14 14h2M8 17h2"></path>
-            </svg>
-          </span>
-          Add to Calendar
-        </a>
-        <a class="invite-action invite-action-directions" href="{{ directions_url }}" target="_blank" rel="noopener">
-          <span class="invite-action-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24">
-              <path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"></path>
-              <circle cx="12" cy="10" r="2.5"></circle>
-            </svg>
-          </span>
-          Get Directions
-        </a>
-        <a class="invite-action invite-action-whatsapp" href="{{ whatsapp_url }}" target="_blank" rel="noopener">
-          <span class="invite-action-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24">
-              <path d="M20.5 11.6a8.4 8.4 0 0 1-12.4 7.3L3 20l1.2-4.9a8.4 8.4 0 1 1 16.3-3.5Z"></path>
-              <path d="M8.6 8.3c.2-.5.4-.5.7-.5h.5c.2 0 .4.1.5.4l.7 1.7c.1.3.1.5-.1.7l-.5.6c-.2.2-.2.4 0 .7.5.9 1.3 1.7 2.2 2.2.3.2.5.2.7 0l.7-.8c.2-.2.4-.3.7-.2l1.6.8c.3.1.4.3.4.5 0 .3-.2 1.2-.7 1.6-.5.5-1.2.7-2 .6-1.1-.2-2.5-.9-3.8-2.1-1.1-1-2-2.3-2.3-3.3-.3-1 .1-1.9.4-2.3Z"></path>
-            </svg>
-          </span>
-          Share on WhatsApp
-        </a>
-      </nav>
     </article>
   </main>
 </body>

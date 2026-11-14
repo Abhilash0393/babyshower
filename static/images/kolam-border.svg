@@ -1,4 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 36" fill="none">
-  <path d="M0 18h20c8-12 16-12 24 0s16 12 24 0 16-12 24 0 16 12 24 0 16-12 24 0 16 12 24 0 16-12 24 0 16 12 24 0h28" stroke="#b48b47" stroke-width="2"/>
-  <path d="M20 18h24m24 0h24m24 0h24m24 0h24m24 0h24" stroke="#76906b" stroke-width="1.5" stroke-dasharray="2 5"/>
+  <path d="M0 18h28m44 0h26m44 0h26m44 0h28" stroke="#fffaf0" stroke-width="1.7" stroke-linecap="round"/>
+  <g stroke="#fffaf0" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M36 18c0-5 5-10 12-10s12 5 12 10-5 10-12 10-12-5-12-10Z"/>
+    <path d="M48 6c5 0 10 5 10 12s-5 12-10 12-10-5-10-12S43 6 48 6Z"/>
+    <path d="M108 18c0-5 5-10 12-10s12 5 12 10-5 10-12 10-12-5-12-10Z"/>
+    <path d="M120 6c5 0 10 5 10 12s-5 12-10 12-10-5-10-12 5-12 10-12Z"/>
+    <path d="M180 18c0-5 5-10 12-10s12 5 12 10-5 10-12 10-12-5-12-10Z"/>
+    <path d="M192 6c5 0 10 5 10 12s-5 12-10 12-10-5-10-12 5-12 10-12Z"/>
+    <path d="M41 13l14 10m0-10L41 23m67-10 24 10m0-10-24 10m67-10 24 10m0-10-24 10"/>
+  </g>
+  <g fill="#fffaf0">
+    <circle cx="48" cy="18" r="1.6"/><circle cx="120" cy="18" r="1.6"/><circle cx="192" cy="18" r="1.6"/>
+  </g>
 </svg>

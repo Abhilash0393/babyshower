@@ -50,7 +50,7 @@ Run the unit and route tests with `python -m pytest`.
 
 ## Event configuration
 
-The invitation at `/invite` is responsive HTML/CSS and uses locally bundled Cormorant Garamond (SIL Open Font License) with serif fallbacks. It contains the revised wording, the supplied couple illustration, a generated directions QR, and the animated Kolam frame. The **Add to Calendar**, **Get Directions**, and **Share on WhatsApp** actions remain inside the frame. The calendar retains `EVENT_DATE` (including its configured year); the date printed in the invitation omits the year.
+The invitation at `/invite` is responsive HTML/CSS and uses locally bundled Cormorant Garamond (SIL Open Font License) with serif fallbacks. It contains the revised wording, the supplied couple illustration, a generated directions QR, and a thick maroon frame with animated white Kolam knotwork and leafy corner sprays. The **Add to Calendar**, **Get Directions**, and **Share on WhatsApp** actions remain inside the framed invitation panel. The calendar retains `EVENT_DATE` (including its configured year); the date printed in the invitation omits the year.
 
 The WhatsApp action shares a concise message and one same-origin short link, currently `/i?v=5`. `/i` redirects to `/invite?v=5`, the full interactive HTML invitation. The actual canonical metadata and 1200 x 630 Open Graph/Twitter preview remain on `/invite` and `/invite/cover.png`; the cover is generated from the revised invitation details and couple image. A URL cannot be hidden in a WhatsApp text message while also using it to create a rich link preview; the short route avoids repeating the long `/invite` path but WhatsApp may still display that single short link beneath its preview.
 
@@ -74,7 +74,26 @@ The display is preloaded with eight local motherhood images and original caption
    ```
 
    `author` is optional.    The app validates paths and skips missing or unsafe entries. If no valid slides remain, it reports that rather than showing fabricated content.
-On `/display`, the slideshow shuffles slides without immediately repeating one, preloads the next image, and rotates every 15 seconds by default. In automatic mode, new votes show the live results for 10 seconds; subsequent votes extend the results display. It then continues from the queued slide. On `/admin`, use **Big Screen Experience** to change mode or duration, pause/resume, navigate, preview the current slide, inspect the available list, and request a manifest reload.
+On `/display`, the slideshow shuffles slides without immediately repeating one, preloads the next image, and rotates every 15 seconds by default. Each `static/photos/manifest.json` entry can specify a `textLayout` with position, alignment, desktop and mobile maximum width/insets, minimum/preferred/maximum font sizing, color, shadow, line height, padding, gradient, image focal point, and a percentage-based subject-safe area. Layout values are validated before being returned by `/api/slides`; the browser wraps text within the selected region, reduces its size if needed to fit the frame, and checks alternative positions against the visible subject-safe area after accounting for `object-fit: cover`. The three reference compositions are configured in `motherhood-tender-guidance` (top-right), `motherhood-golden-hour` (center-right), and `motherhood-lifted-high` (center-left). In automatic mode, new votes show the live results for 10 seconds; subsequent votes extend the results display. It then continues from the queued slide. On `/admin`, use **Big Screen Experience** to change mode or duration, pause/resume, navigate, preview the current slide, inspect the available list, and request a manifest reload.
+
+Example per-image metadata:
+
+```json
+"textLayout": {
+  "position": "top-right",
+  "alignment": "right",
+  "maxWidthPct": 35,
+  "minFontPx": 18,
+  "preferredFontVw": 3.2,
+  "maxFontPx": 54,
+  "color": "#342414",
+  "shadow": "light",
+  "lineHeight": 1.15,
+  "overlay": "right-light",
+  "objectPosition": "center center",
+  "subjectArea": { "left": 18, "top": 14, "right": 64, "bottom": 92 }
+}
+```
 
 Private photographs are excluded from Git by default. For deployment, copy them directly to the host and edit the manifest there, or use a private repository.
 

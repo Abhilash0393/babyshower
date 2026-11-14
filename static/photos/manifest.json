@@ -3,50 +3,191 @@
     "id": "motherhood-sunset-walk",
     "image": "/static/photos/20bce4a8c0d950d511daa6029fb769ee.jpg",
     "caption": "A mother's hand makes every new path feel safe.",
-    "category": "A Mother's Love"
+    "category": "A Mother's Love",
+    "textLayout": {
+      "position": "top-left",
+      "alignment": "left",
+      "maxWidthPct": 38,
+      "minFontPx": 18,
+      "preferredFontVw": 3.2,
+      "maxFontPx": 54,
+      "color": "#30231d",
+      "shadow": "light",
+      "lineHeight": 1.15,
+      "paddingPx": 0,
+      "overlay": "none",
+      "fontFamily": "serif",
+      "fontWeight": 600,
+      "objectPosition": "center center",
+      "subjectArea": { "left": 54, "top": 23, "right": 100, "bottom": 100 }
+    }
   },
   {
     "id": "motherhood-lifted-high",
     "image": "/static/photos/277753206cb5ca6d744b336a483f509b.jpg",
     "caption": "In her arms, even the sky feels within reach.",
-    "category": "Little Moments"
+    "category": "Little Moments",
+    "textLayout": {
+      "position": "center-left",
+      "alignment": "left",
+      "maxWidthPct": 38,
+      "minFontPx": 20,
+      "preferredFontVw": 3.4,
+      "maxFontPx": 58,
+      "color": "#282620",
+      "shadow": "light",
+      "lineHeight": 1.15,
+      "paddingPx": 0,
+      "overlay": "none",
+      "fontFamily": "serif",
+      "fontWeight": 600,
+      "objectPosition": "center center",
+      "subjectArea": { "left": 49, "top": 4, "right": 100, "bottom": 100 }
+    }
   },
   {
     "id": "motherhood-by-the-sea",
     "image": "/static/photos/2f1816d0d889e4aade928900632aa3f0.jpg",
     "caption": "The best memories are made one small step at a time.",
-    "category": "Growing Together"
+    "category": "Growing Together",
+    "textLayout": {
+      "position": "bottom-left",
+      "alignment": "left",
+      "maxWidthPct": 34,
+      "minFontPx": 18,
+      "preferredFontVw": 3.1,
+      "maxFontPx": 52,
+      "color": "#40240f",
+      "shadow": "light",
+      "lineHeight": 1.14,
+      "paddingPx": 0,
+      "overlay": "bottom-light",
+      "fontFamily": "serif",
+      "fontWeight": 600,
+      "objectPosition": "center center",
+      "subjectArea": { "left": 60, "top": 20, "right": 100, "bottom": 100 }
+    }
   },
   {
     "id": "motherhood-golden-hour",
     "image": "/static/photos/549d5e49e8d0a2356648a31ff9796779.jpg",
     "caption": "Her love is the light that stays long after sunset.",
-    "category": "A Mother's Love"
+    "category": "A Mother's Love",
+    "textLayout": {
+      "position": "center-right",
+      "alignment": "right",
+      "maxWidthPct": 35,
+      "mobileMaxWidthPct": 18,
+      "minFontPx": 18,
+      "preferredFontVw": 3.1,
+      "maxFontPx": 52,
+      "insetXVw": 3.5,
+      "insetYVh": 1.5,
+      "color": "#34200f",
+      "shadow": "light",
+      "lineHeight": 1.14,
+      "paddingPx": 0,
+      "overlay": "right-light",
+      "fontFamily": "serif",
+      "fontWeight": 600,
+      "objectPosition": "center center",
+      "subjectArea": { "left": 18, "top": 8, "right": 57, "bottom": 100 }
+    }
   },
   {
     "id": "motherhood-tender-guidance",
     "image": "/static/photos/7225a0f36265f7e124eb843bfbc62f5a.jpg",
     "caption": "A gentle hand can teach a heart to be brave.",
-    "category": "Growing Together"
+    "category": "Growing Together",
+    "textLayout": {
+      "position": "top-right",
+      "alignment": "right",
+      "maxWidthPct": 28,
+      "mobileMaxWidthPct": 40,
+      "mobileInsetYVh": 1,
+      "minFontPx": 18,
+      "preferredFontVw": 3.2,
+      "maxFontPx": 54,
+      "color": "#342414",
+      "shadow": "light",
+      "lineHeight": 1.15,
+      "paddingPx": 0,
+      "overlay": "right-light",
+      "fontFamily": "serif",
+      "fontWeight": 600,
+      "objectPosition": "center center",
+      "subjectArea": { "left": 18, "top": 14, "right": 64, "bottom": 92 }
+    }
   },
   {
     "id": "motherhood-on-the-horizon",
     "image": "/static/photos/bd09eced6b4c4c054bbefc9ec8de86d3.jpg",
     "caption": "Every little journey is brighter when shared with love.",
-    "category": "Little Moments"
+    "category": "Little Moments",
+    "textLayout": {
+      "position": "center-left",
+      "alignment": "left",
+      "maxWidthPct": 36,
+      "minFontPx": 18,
+      "preferredFontVw": 3.1,
+      "maxFontPx": 54,
+      "color": "#2d1b0c",
+      "shadow": "light",
+      "lineHeight": 1.15,
+      "paddingPx": 0,
+      "overlay": "left-light",
+      "fontFamily": "serif",
+      "fontWeight": 600,
+      "objectPosition": "center center",
+      "subjectArea": { "left": 58, "top": 30, "right": 75, "bottom": 92 }
+    }
   },
   {
     "id": "motherhood-vintage-embrace",
     "image": "/static/photos/mother-child-vintage-public-domain.jpg",
     "caption": "A mother's embrace is a home the heart can always find.",
     "category": "A Mother's Love",
-    "author": "Mikuláš Galanda · public domain"
+    "author": "Mikuláš Galanda · public domain",
+    "textLayout": {
+      "position": "center-right",
+      "alignment": "right",
+      "maxWidthPct": 34,
+      "minFontPx": 18,
+      "preferredFontVw": 3,
+      "maxFontPx": 50,
+      "color": "#fffaf0",
+      "shadow": "dark",
+      "lineHeight": 1.15,
+      "paddingPx": 0,
+      "overlay": "right-dark",
+      "fontFamily": "serif",
+      "fontWeight": 600,
+      "objectPosition": "center center",
+      "subjectArea": { "left": 22, "top": 8, "right": 83, "bottom": 98 }
+    }
   },
   {
     "id": "motherhood-mary-cassatt",
     "image": "/static/photos/mother-young-sewing-mary-cassatt.jpg",
     "caption": "Love lives in the quiet care we give each day.",
     "category": "Little Moments",
-    "author": "Image: Gandalf's Gallery · CC BY-SA 2.0"
+    "author": "Image: Gandalf's Gallery · CC BY-SA 2.0",
+    "textLayout": {
+      "position": "top-left",
+      "alignment": "left",
+      "maxWidthPct": 16,
+      "minFontPx": 16,
+      "preferredFontVw": 2.8,
+      "maxFontPx": 42,
+      "color": "#243329",
+      "shadow": "light",
+      "lineHeight": 1.12,
+      "paddingPx": 0,
+      "overlay": "top-light",
+      "fontFamily": "serif",
+      "fontWeight": 600,
+      "objectPosition": "center center",
+      "subjectArea": { "left": 38, "top": 3, "right": 100, "bottom": 100 }
+    }
   }
 ]

@@ -5,7 +5,7 @@ from urllib.parse import unquote
 
 import pytest
 
-from app import create_app
+from app import create_app, normalized_slide_layout
 
 
 @pytest.fixture
@@ -193,6 +193,8 @@ def test_required_routes_are_available(client):
 
 def test_display_uses_prediction_language_percentages_and_kolam_frame(client):
     page = client.get("/display").data
+    script = client.get("/static/js/display.js").data
+    styles = client.get("/static/css/app.css").data
 
     assert b"The Room Is Leaning..." in page
     assert b"What's Your Prediction?" not in page
@@ -203,6 +205,84 @@ def test_display_uses_prediction_language_percentages_and_kolam_frame(client):
     assert b'class="kolam-frame"' in page
     assert b'id="toggleMusicButton"' in page
     assert b"Enable Music</button>" not in page
+    assert b'id="captionText"' in page
+    assert b"display.js?v=display-layout-3" in page
+    assert b"app.css?v=display-layout-3" in page
+    assert b"captionCategory" not in page
+    assert b"captionAuthor" not in page
+    assert b"slide.author" not in script
+    assert b"function fitCaption()" in script
+    assert b"max-width: min(var(--caption-max-width" in styles
+    assert b"font-size: clamp(var(--caption-font-min" in styles
+    assert b"text-wrap: balance" in styles
+    assert b"overflow-wrap: anywhere" in styles
+    for position in (
+        b"top-left", b"top-right", b"center-left", b"center-right",
+        b"bottom-left", b"bottom-right", b"center",
+    ):
+        assert b'[data-position="' + position + b'"]' in styles
+    assert b"objectPosition" in script
+    assert b"getSubjectBounds" in script
+    assert b"positionCaption" in script
+
+
+def test_slides_expose_validated_image_specific_caption_layouts(client):
+    slides = client.get("/api/slides").json["slides"]
+    by_id = {slide["id"]: slide for slide in slides}
+
+    assert by_id["motherhood-tender-guidance"]["text_layout"]["position"] == "top-right"
+    assert by_id["motherhood-golden-hour"]["text_layout"]["position"] == "center-right"
+    assert by_id["motherhood-lifted-high"]["text_layout"]["position"] == "center-left"
+    assert by_id["motherhood-tender-guidance"]["text_layout"]["mobileMaxWidthPct"] == 40
+    assert by_id["motherhood-tender-guidance"]["text_layout"]["mobileInsetYVh"] == 1
+    assert by_id["motherhood-golden-hour"]["text_layout"]["mobileMaxWidthPct"] == 18
+    assert by_id["motherhood-mary-cassatt"]["text_layout"]["subjectArea"]["left"] == 38
+    for slide in slides:
+        layout = slide["text_layout"]
+        assert 18 <= layout["maxWidthPct"] <= 80
+        assert layout["minFontPx"] <= layout["maxFontPx"]
+        assert layout["alignment"] in {"left", "center", "right"}
+        assert set(layout["subjectArea"]) == {"left", "top", "right", "bottom"}
+
+
+def test_slide_layout_rejects_unsafe_or_invalid_configuration():
+    layout = normalized_slide_layout({
+        "position": "fixed;top:0",
+        "alignment": [],
+        "maxWidthPct": 1000,
+        "minFontPx": 90,
+        "maxFontPx": 12,
+        "color": "red; background:url(javascript:alert(1))",
+        "overlay": "custom",
+        "objectPosition": "expression(alert(1))",
+        "subjectArea": {"left": -10, "right": 120, "top": 30, "bottom": 10},
+    })
+
+    assert layout["position"] == "center"
+    assert layout["alignment"] == "center"
+    assert layout["maxWidthPct"] == 80
+    assert layout["minFontPx"] == layout["maxFontPx"] == 72
+    assert layout["color"] == "#fffaf0"
+    assert layout["overlay"] == "none"
+    assert layout["objectPosition"] == "center center"
+    assert layout["subjectArea"] == {"left": 0, "top": 30, "right": 100, "bottom": 30}
+    assert layout["mobileInsetYVh"] == 5
+
+
+def test_invitation_keeps_actions_inside_animated_maroon_kolam_frame(client):
+    page = client.get("/invite").data
+    page_text = page.decode()
+
+    assert page_text.index('class="invite-card"') < page_text.index('class="invite-actions"')
+    assert page_text.index('class="invite-actions"') < page_text.index("</div>\n    </article>")
+    assert b"</footer>\n        <nav class=\"invite-actions\"" in page
+    assert b"invite-kolam-frame" in page
+    assert b"kolam-corner.svg" in page
+    assert b"invite-leaves.svg" in page
+    styles = client.get("/static/css/app.css?v=invite-card-10").data
+    assert b"kolam-side.svg" in styles
+    assert client.get("/static/images/kolam-side.svg").status_code == 200
+    assert client.get("/static/images/invite-leaves.svg").status_code == 200
 
 
 def test_slideshow_manifest_has_loadable_motherhood_slides(client):
@@ -303,9 +383,11 @@ def test_invitation_has_configured_event_and_no_rsvp(client):
     assert b"Get Directions" in response.data
     assert b"Share on WhatsApp" in response.data
     assert b"google.com/maps/dir/" in response.data
-    styles = client.get("/static/css/app.css?v=invite-card-8").data
-    assert b"border: 12px solid #6b0920" in styles
-    assert b"border-width: 9px" in styles
+    styles = client.get("/static/css/app.css?v=invite-card-10").data
+    assert b"background: #8d0921" in styles
+    assert b"brightness(0) invert(1)" in styles
+    assert b"animation: kolam-edge-flow" in styles
+    assert b"padding: 23px 20px" in styles
     cover = client.get("/invite/cover.png?v=5")
     assert cover.mimetype == "image/png"
     assert cover.data.startswith(b"\x89PNG")
@@ -384,6 +466,7 @@ def test_slideshow_manifest_pairs_content_and_ignores_invalid_paths(app, client,
         "caption": "A tiny hand can hold an entire heart.",
         "category": "Love",
         "author": "Family",
+        "text_layout": normalized_slide_layout(None),
     }]
     assert client.get("/api/photos").json["photos"] == ["/static/photos/approved.jpg"]
 

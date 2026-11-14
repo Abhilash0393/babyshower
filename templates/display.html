@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="csrf-token" content="{{ csrf_token }}">
   <title>{{ event_title }} · Big Screen</title>
-  <link rel="stylesheet" href="/static/css/app.css">
+  <link rel="stylesheet" href="/static/css/app.css?v=display-layout-3">
 </head>
 <body class="display-body">
   <main class="display-root">
@@ -21,8 +21,6 @@
         <img id="slideshowImage" alt="" class="slideshow-image hidden">
         <div class="photo-caption hidden" id="photoCaption">
           <span id="captionText"></span>
-          <span class="photo-category" id="captionCategory"></span>
-          <span class="photo-author" id="captionAuthor"></span>
         </div>
       </div>
     </section>
@@ -60,6 +58,6 @@
     <audio id="backgroundMusic" loop preload="none"></audio>
     <div class="display-toast" id="displayToast" role="status" aria-live="polite"></div>
   </main>
-  <script src="/static/js/display.js" defer></script>
+  <script src="/static/js/display.js?v=display-layout-3" defer></script>
 </body>
 </html>

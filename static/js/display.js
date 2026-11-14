@@ -6,6 +6,17 @@
   const audio = $("backgroundMusic");
   const image = $("slideshowImage");
   const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+  const captionOverlays = {
+    none: "none",
+    "left-light": "linear-gradient(90deg, #fff8e9b8, #fff8e966 70%, transparent)",
+    "right-light": "linear-gradient(270deg, #fff8e9b8, #fff8e966 70%, transparent)",
+    "top-light": "linear-gradient(180deg, #fff8e9b8, #fff8e966 70%, transparent)",
+    "bottom-light": "linear-gradient(0deg, #fff8e9b8, #fff8e966 70%, transparent)",
+    "left-dark": "linear-gradient(90deg, #20140dcc, #20140d66 70%, transparent)",
+    "right-dark": "linear-gradient(270deg, #20140dcc, #20140d66 70%, transparent)",
+    "top-dark": "linear-gradient(180deg, #20140dcc, #20140d66 70%, transparent)",
+    "bottom-dark": "linear-gradient(0deg, #20140dcc, #20140d66 70%, transparent)",
+  };
   let slides = [];
   let queue = [];
   let history = [];
@@ -79,7 +90,10 @@
     if (!slide) return;
     currentSlide = slide;
     image.classList.remove("photo-in");
-    image.onload = () => requestAnimationFrame(() => image.classList.add("photo-in"));
+    image.onload = () => requestAnimationFrame(() => {
+      image.classList.add("photo-in");
+      positionCaption(slide.text_layout);
+    });
     image.onerror = () => {
       slides = slides.filter((item) => item.id !== slide.id);
       history = history.filter((id) => id !== slide.id);
@@ -92,18 +106,136 @@
       shuffleQueue();
       if (slides.length) advanceSlide();
     };
-    image.alt = slide.caption || slide.category || "Family photograph";
+    image.alt = slide.caption || "Family photograph";
+    image.style.objectPosition = slide.text_layout?.objectPosition || "center center";
     image.src = slide.image;
     image.classList.remove("hidden");
     $("photoPlaceholder").classList.add("hidden");
     $("captionText").textContent = slide.caption || "";
-    $("captionCategory").textContent = slide.category || "";
-    $("captionAuthor").textContent = slide.author ? `— ${slide.author}` : "";
-    $("photoCaption").classList.toggle(
-      "hidden", !slide.caption && !slide.category && !slide.author
+    const caption = $("photoCaption");
+    const layout = slide.text_layout || {};
+    caption.classList.toggle("hidden", !slide.caption);
+    caption.dataset.position = layout.position || "center";
+    caption.dataset.alignment = layout.alignment || "center";
+    caption.dataset.shadow = layout.shadow || "dark";
+    caption.dataset.overlay = layout.overlay || "none";
+    caption.dataset.subjectArea = JSON.stringify(layout.subjectArea || {});
+    applyResponsiveCaptionSettings(layout);
+    caption.style.setProperty("--caption-font-min", `${layout.minFontPx || 20}px`);
+    caption.style.setProperty("--caption-font-preferred", `${layout.preferredFontVw || 3.2}vw`);
+    caption.style.setProperty("--caption-font-max", `${layout.maxFontPx || 54}px`);
+    caption.style.setProperty("--caption-color", layout.color || "#fffaf0");
+    caption.style.setProperty("--caption-align", layout.alignment || "center");
+    caption.style.setProperty("--caption-line-height", layout.lineHeight || 1.15);
+    caption.style.setProperty("--caption-padding", `${layout.paddingPx || 0}px`);
+    caption.style.setProperty("--caption-weight", layout.fontWeight || 600);
+    caption.style.setProperty(
+      "--caption-font-family",
+      layout.fontFamily === "sans" ? '"Segoe UI", Arial, sans-serif' : 'Georgia, "Times New Roman", serif'
     );
+    caption.style.setProperty("--caption-overlay", captionOverlays[layout.overlay] || "none");
+    positionCaption(layout);
     reportCurrentSlide(slide);
     preloadNext();
+  }
+
+  function applyResponsiveCaptionSettings(layout) {
+    const caption = $("photoCaption");
+    const isMobile = window.matchMedia("(max-width: 600px)").matches;
+    const maxWidth = isMobile
+      ? layout.mobileMaxWidthPct || layout.maxWidthPct || 48
+      : layout.maxWidthPct || 48;
+    const insetY = isMobile
+      ? layout.mobileInsetYVh || layout.insetYVh || 5
+      : layout.insetYVh || 5;
+    caption.style.setProperty("--caption-max-width", `${maxWidth}%`);
+    caption.style.setProperty("--caption-inset-x", `clamp(14px, ${layout.insetXVw || 5}vw, 72px)`);
+    caption.style.setProperty("--caption-inset-y", `clamp(14px, ${insetY}vh, 72px)`);
+  }
+
+  function getSubjectBounds(layout) {
+    if (!image.naturalWidth || !image.naturalHeight) return null;
+    const area = layout.subjectArea;
+    if (!area) return null;
+    const frame = image.getBoundingClientRect();
+    const scale = Math.max(
+      frame.width / image.naturalWidth,
+      frame.height / image.naturalHeight
+    );
+    const renderedWidth = image.naturalWidth * scale;
+    const renderedHeight = image.naturalHeight * scale;
+    const [horizontal = "center", vertical = "center"] = layout.objectPosition.split(" ");
+    const alignments = { left: 0, center: 0.5, right: 1 };
+    const imageLeft = frame.left + (frame.width - renderedWidth) * alignments[horizontal];
+    const imageTop = frame.top + (frame.height - renderedHeight) * alignments[vertical];
+    return {
+      left: Math.max(frame.left, imageLeft + renderedWidth * area.left / 100),
+      top: Math.max(frame.top, imageTop + renderedHeight * area.top / 100),
+      right: Math.min(frame.right, imageLeft + renderedWidth * area.right / 100),
+      bottom: Math.min(frame.bottom, imageTop + renderedHeight * area.bottom / 100),
+    };
+  }
+
+  function positionCaption(layout) {
+    const caption = $("photoCaption");
+    if (!layout || caption.classList.contains("hidden")) return;
+    const preferred = layout.position || "center";
+    const positions = [
+      preferred,
+      "top-left", "top-right", "center-left", "center-right",
+      "bottom-left", "bottom-right", "center",
+    ].filter((position, index, list) => list.indexOf(position) === index);
+    const subject = getSubjectBounds(layout);
+    if (!subject) {
+      caption.dataset.position = preferred;
+      fitCaption();
+      return;
+    }
+
+    const frame = caption.parentElement.getBoundingClientRect();
+    let bestPosition = preferred;
+    let bestScore = Number.POSITIVE_INFINITY;
+    for (const position of positions) {
+      caption.dataset.position = position;
+      fitCaption();
+      const bounds = caption.getBoundingClientRect();
+      const overlapWidth = Math.max(
+        0,
+        Math.min(bounds.right, subject.right) - Math.max(bounds.left, subject.left)
+      );
+      const overlapHeight = Math.max(
+        0,
+        Math.min(bounds.bottom, subject.bottom) - Math.max(bounds.top, subject.top)
+      );
+      const outside = Math.max(0, frame.left - bounds.left)
+        + Math.max(0, frame.top - bounds.top)
+        + Math.max(0, bounds.right - frame.right)
+        + Math.max(0, bounds.bottom - frame.bottom);
+      const score = overlapWidth * overlapHeight + outside * frame.width * 4;
+      if (score < bestScore) {
+        bestScore = score;
+        bestPosition = position;
+      }
+      if (score === 0) break;
+    }
+    caption.dataset.position = bestPosition;
+    fitCaption();
+  }
+
+  function fitCaption() {
+    const caption = $("photoCaption");
+    if (caption.classList.contains("hidden")) return;
+    caption.style.fontSize = "";
+    const minimumSize = parseFloat(
+      getComputedStyle(caption).getPropertyValue("--caption-font-min")
+    ) || 12;
+    for (let attempt = 0; attempt < 3 && caption.scrollHeight > caption.clientHeight; attempt += 1) {
+      const currentSize = parseFloat(getComputedStyle(caption).fontSize);
+      const fittedSize = currentSize * caption.clientHeight / caption.scrollHeight;
+      const nextSize = Math.max(minimumSize, Math.min(currentSize, fittedSize));
+      caption.style.fontSize = `${nextSize}px`;
+      if (nextSize === minimumSize) break;
+    }
   }
 
   function advanceSlide() {
@@ -178,11 +310,19 @@
     if (slideshowPaused || !slides.length || currentMode === "meter" || currentMode === "special") {
       return;
     }
+
     slideTimer = window.setTimeout(() => {
       advanceSlide();
       scheduleSlide();
     }, slideDuration * 1000);
   }
+
+  window.addEventListener("resize", () => {
+    if (!currentSlide) return;
+    const layout = currentSlide.text_layout || {};
+    applyResponsiveCaptionSettings(layout);
+    positionCaption(layout);
+  });
 
   function pulse(element) {
     element.classList.remove("bump");
