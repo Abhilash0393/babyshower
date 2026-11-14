@@ -279,8 +279,10 @@ def test_invitation_keeps_actions_inside_animated_maroon_kolam_frame(client):
     assert b"invite-kolam-frame" in page
     assert b"kolam-corner.svg" in page
     assert b"invite-leaves.svg" in page
-    styles = client.get("/static/css/app.css?v=invite-card-10").data
+    styles = client.get("/static/css/app.css?v=invite-card-11").data
     assert b"kolam-side.svg" in styles
+    assert b"width: min(100%, 950px)" in styles
+    assert b"box-shadow: 0 0 0 3px #d3b46e" in styles
     assert client.get("/static/images/kolam-side.svg").status_code == 200
     assert client.get("/static/images/invite-leaves.svg").status_code == 200
 
@@ -383,7 +385,7 @@ def test_invitation_has_configured_event_and_no_rsvp(client):
     assert b"Get Directions" in response.data
     assert b"Share on WhatsApp" in response.data
     assert b"google.com/maps/dir/" in response.data
-    styles = client.get("/static/css/app.css?v=invite-card-10").data
+    styles = client.get("/static/css/app.css?v=invite-card-11").data
     assert b"background: #8d0921" in styles
     assert b"brightness(0) invert(1)" in styles
     assert b"animation: kolam-edge-flow" in styles
