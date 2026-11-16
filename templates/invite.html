@@ -21,7 +21,21 @@
   <meta name="twitter:description" content="{{ share_description }}">
   <meta name="twitter:image" content="{{ cover_url }}">
   <title>{{ event_title }} · Invitation</title>
-  <link rel="stylesheet" href="/static/css/app.css?v=invite-card-11">
+  <link rel="stylesheet" href="/static/css/app.css?v=invite-card-12">
+  <script>
+    (function () {
+      var root = document.documentElement;
+      root.classList.add("js");
+      var done = false;
+      function ready() { if (!done) { done = true; root.classList.add("is-ready"); } }
+      // Start the soft reveal once the serif font is in (no mid-fade text swap); never wait long.
+      var fonts = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
+      Promise.race([fonts, new Promise(function (r) { setTimeout(r, 1200); })]).then(function () {
+        if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", ready); } else { ready(); }
+      });
+      setTimeout(ready, 1800);
+    })();
+  </script>
 </head>
 <body class="invite-body">
   <main class="invite-wrap">
