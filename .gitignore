@@ -7,7 +7,7 @@ instance/*.sqlite3-*
 static/music/*
 !static/music/README.txt
 !static/music/alex-morgan-india-drums-tabla-sitar-ethnic-mood-587419.mp3
-static/photos/*
+!static/photos/*
 !static/photos/README.txt
 !static/photos/manifest.json
 !static/photos/20bce4a8c0d950d511daa6029fb769ee.jpg
