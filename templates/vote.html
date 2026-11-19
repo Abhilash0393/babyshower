@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="csrf-token" content="{{ csrf_token }}">
   <title>{{ event_title }} · Prediction</title>
-  <link rel="stylesheet" href="/static/css/app.css">
+  <link rel="stylesheet" href="/static/css/app.css?v=vote-layout-3">
 </head>
 <body class="app-bg vote-body" data-mode="{{ mode }}">
   <main class="vote-wrap">
@@ -53,6 +53,7 @@
         </button>
       </div>
       <p class="status" id="voteStatus" role="status" aria-live="polite"></p>
+      <div class="choice-announcement" id="choiceAnnouncement" aria-hidden="true"></div>
     </section>
     <section class="vote-card thankyou-card hidden" id="thankyouCard" aria-labelledby="thanksTitle">
       <div class="success-mark" aria-hidden="true">✓</div>
@@ -64,6 +65,6 @@
     </section>
     <footer>Made with love for our growing family ♡</footer>
   </main>
-  <script src="/static/js/vote.js" defer></script>
+  <script src="/static/js/vote.js?v=choice-celebration-2" defer></script>
 </body>
 </html>

@@ -5,22 +5,68 @@
   const status = document.getElementById("voteStatus");
   const chosen = document.getElementById("chosenText");
   const again = document.getElementById("againButton");
+  const announcement = document.getElementById("choiceAnnouncement");
   const buttons = [...document.querySelectorAll(".choice")];
   const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+  const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
+  let audioContext = null;
   let busy = false;
+
+  function applyMotionPreference() {
+    document.body.classList.toggle("reduce-motion", motionPreference.matches);
+  }
+
+  applyMotionPreference();
+  if (motionPreference.addEventListener) {
+    motionPreference.addEventListener("change", applyMotionPreference);
+  } else {
+    motionPreference.addListener(applyMotionPreference);
+  }
+
+  function playSelectionChime() {
+    try {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+      if (!audioContext) audioContext = new AudioContextClass();
+      if (audioContext.state === "suspended") {
+        audioContext.resume().catch((error) => console.warn("Could not play selection chime.", error));
+      }
+
+      [784, 1047].forEach((frequency, index) => {
+        const start = audioContext.currentTime + index * 0.13;
+        const oscillator = audioContext.createOscillator();
+        const volume = audioContext.createGain();
+        oscillator.type = "sine";
+        oscillator.frequency.setValueAtTime(frequency, start);
+        volume.gain.setValueAtTime(0.0001, start);
+        volume.gain.exponentialRampToValueAtTime(0.12, start + 0.02);
+        volume.gain.exponentialRampToValueAtTime(0.0001, start + 0.3);
+        oscillator.connect(volume);
+        volume.connect(audioContext.destination);
+        oscillator.start(start);
+        oscillator.stop(start + 0.31);
+      });
+    } catch (error) {
+      console.warn("Could not play selection chime.", error);
+    }
+  }
 
   function animateSelection(button) {
     buttons.forEach((choice) => {
       choice.classList.toggle("is-selecting", choice === button);
       choice.classList.toggle("is-muted", choice !== button);
     });
-    button.classList.add("is-selecting");
-    const duration = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 1400;
+    const choice = button.dataset.choice;
+    announcement.textContent = `You chose ${choice === "girl" ? "Baby Girl" : "Baby Boy"}!`;
+    announcement.classList.add("is-visible");
+    const duration = motionPreference.matches ? 800 : 1400;
     return new Promise((resolve) => {
       window.setTimeout(() => {
         buttons.forEach((choice) => {
           choice.classList.remove("is-selecting", "is-muted");
         });
+        announcement.classList.remove("is-visible");
+        announcement.textContent = "";
         resolve();
       }, duration);
     });
@@ -38,8 +84,9 @@
   async function cast(choice, button) {
     if (busy) return;
     busy = true;
-    status.textContent = "Saving your prediction…";
+    status.textContent = `You chose ${choice === "girl" ? "Baby Girl" : "Baby Boy"}! Saving your prediction…`;
     buttons.forEach((button) => { button.disabled = true; });
+    playSelectionChime();
     const selectionAnimation = animateSelection(button);
 
     try {

@@ -143,51 +143,66 @@
     }
   },
   {
-    "id": "motherhood-vintage-embrace",
-    "image": "/static/photos/mother-child-vintage-public-domain.jpg",
-    "caption": "A mother's embrace is a home the heart can always find.",
-    "category": "A Mother's Love",
-    "author": "Mikuláš Galanda · public domain",
-    "textLayout": {
-      "position": "center-right",
-      "alignment": "right",
-      "maxWidthPct": 34,
-      "minFontPx": 18,
-      "preferredFontVw": 3,
-      "maxFontPx": 50,
-      "color": "#fffaf0",
-      "shadow": "dark",
-      "lineHeight": 1.15,
-      "paddingPx": 0,
-      "overlay": "right-dark",
-      "fontFamily": "serif",
-      "fontWeight": 600,
-      "objectPosition": "center center",
-      "subjectArea": { "left": 22, "top": 8, "right": 83, "bottom": 98 }
-    }
+    "id": "pexels-freestockpro-8403890",
+    "image": "/static/photos/pexels-freestockpro-8403890.jpg",
+    "caption": "A new adventure begins with one beautiful little heartbeat.",
+    "category": "The Joy Ahead",
+    "textLayout": { "position": "bottom-left", "alignment": "left", "maxWidthPct": 38, "minFontPx": 18, "preferredFontVw": 3.2, "maxFontPx": 54, "color": "#fffaf0", "shadow": "dark", "lineHeight": 1.15, "overlay": "bottom-dark", "fontFamily": "serif", "fontWeight": 600, "objectPosition": "center center" }
   },
   {
-    "id": "motherhood-mary-cassatt",
-    "image": "/static/photos/mother-young-sewing-mary-cassatt.jpg",
-    "caption": "Love lives in the quiet care we give each day.",
+    "id": "pexels-freestockpro-1008181",
+    "image": "/static/photos/pexels-freestockpro-1008181.jpg",
+    "caption": "Small hands will hold a whole world of love.",
     "category": "Little Moments",
-    "author": "Image: Gandalf's Gallery · CC BY-SA 2.0",
-    "textLayout": {
-      "position": "top-left",
-      "alignment": "left",
-      "maxWidthPct": 16,
-      "minFontPx": 16,
-      "preferredFontVw": 2.8,
-      "maxFontPx": 42,
-      "color": "#243329",
-      "shadow": "light",
-      "lineHeight": 1.12,
-      "paddingPx": 0,
-      "overlay": "top-light",
-      "fontFamily": "serif",
-      "fontWeight": 600,
-      "objectPosition": "center center",
-      "subjectArea": { "left": 38, "top": 3, "right": 100, "bottom": 100 }
-    }
+    "textLayout": { "position": "top-right", "alignment": "right", "maxWidthPct": 36, "minFontPx": 18, "preferredFontVw": 3.2, "maxFontPx": 54, "color": "#30231d", "shadow": "light", "lineHeight": 1.15, "overlay": "right-light", "fontFamily": "serif", "fontWeight": 600, "objectPosition": "center center" }
+  },
+  {
+    "id": "pexels-gustavo-fring-5163499",
+    "image": "/static/photos/pexels-gustavo-fring-5163499.jpg",
+    "caption": "Today we celebrate the wonder of a life yet to begin.",
+    "category": "Growing Together",
+    "textLayout": { "position": "bottom-right", "alignment": "right", "maxWidthPct": 38, "minFontPx": 18, "preferredFontVw": 3.2, "maxFontPx": 54, "color": "#fffaf0", "shadow": "dark", "lineHeight": 1.15, "overlay": "bottom-dark", "fontFamily": "serif", "fontWeight": 600, "objectPosition": "center center" }
+  },
+  {
+    "id": "pexels-joabel-pires-3559044-5338546",
+    "image": "/static/photos/pexels-joabel-pires-3559044-5338546.jpg",
+    "caption": "May every tomorrow be filled with laughter and love.",
+    "category": "The Joy Ahead",
+    "textLayout": { "position": "center-left", "alignment": "left", "maxWidthPct": 36, "minFontPx": 18, "preferredFontVw": 3.2, "maxFontPx": 54, "color": "#30231d", "shadow": "light", "lineHeight": 1.15, "overlay": "left-light", "fontFamily": "serif", "fontWeight": 600, "objectPosition": "center center" }
+  },
+  {
+    "id": "pexels-jessikaarraes-6151592",
+    "image": "/static/photos/pexels-jessikaarraes-6151592.jpg",
+    "caption": "The family story grows more beautiful with every little chapter.",
+    "category": "A Mother's Love",
+    "textLayout": { "position": "top-left", "alignment": "left", "maxWidthPct": 38, "minFontPx": 18, "preferredFontVw": 3.2, "maxFontPx": 54, "color": "#30231d", "shadow": "light", "lineHeight": 1.15, "overlay": "top-light", "fontFamily": "serif", "fontWeight": 600, "objectPosition": "center center" }
+  },
+  {
+    "id": "pexels-helenalopes-5354548",
+    "image": "/static/photos/pexels-helenalopes-5354548.jpg",
+    "caption": "Together is the sweetest place to begin.",
+    "category": "Growing Together",
+    "textLayout": { "position": "bottom-left", "alignment": "left", "maxWidthPct": 36, "minFontPx": 18, "preferredFontVw": 3.2, "maxFontPx": 54, "color": "#fffaf0", "shadow": "dark", "lineHeight": 1.15, "overlay": "bottom-dark", "fontFamily": "serif", "fontWeight": 600, "objectPosition": "center center" }
+  },
+  {
+    "id": "pexels-junior-matildes-3553563-5322859",
+    "image": "/static/photos/pexels-junior-matildes-3553563-5322859.jpg",
+    "caption": "Little feet, endless dreams, and a lifetime of love.",
+    "category": "Little Moments",
+    "textLayout": { "position": "center-right", "alignment": "right", "maxWidthPct": 36, "minFontPx": 18, "preferredFontVw": 3.2, "maxFontPx": 54, "color": "#30231d", "shadow": "light", "lineHeight": 1.15, "overlay": "right-light", "fontFamily": "serif", "fontWeight": 600, "objectPosition": "center center" }
+  },
+  {
+    "id": "pexels-josh-willink-11499-69096",
+    "image": "/static/photos/pexels-josh-willink-11499-69096.jpg",
+    "caption": "Before the first word comes the first and greatest love.",
+    "category": "A Mother's Love",
+    "textLayout": { "position": "top-right", "alignment": "right", "maxWidthPct": 38, "minFontPx": 18, "preferredFontVw": 3.2, "maxFontPx": 54, "color": "#30231d", "shadow": "light", "lineHeight": 1.15, "overlay": "top-light", "fontFamily": "serif", "fontWeight": 600, "objectPosition": "center center" }
+  },
+  {
+    "id": "pexels-vladimirsrajber-27637122",
+    "image": "/static/photos/pexels-vladimirsrajber-27637122.jpg",
+    "caption": "A precious hello is waiting just around the corner.",
+    "category": "The Joy Ahead",
+    "textLayout": { "position": "bottom-right", "alignment": "right", "maxWidthPct": 38, "minFontPx": 18, "preferredFontVw": 3.2, "maxFontPx": 54, "color": "#fffaf0", "shadow": "dark", "lineHeight": 1.15, "overlay": "bottom-dark", "fontFamily": "serif", "fontWeight": 600, "objectPosition": "center center" }
   }
 ]
