@@ -6,6 +6,9 @@
   const audio = $("backgroundMusic");
   const image = $("slideshowImage");
   const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+  const displaySessionKey = "babyshower-display-started-at";
+  const maxDisplayDuration = 3 * 60 * 60 * 1000;
+  const displayDeadline = getDisplayDeadline();
   const captionOverlays = {
     none: "none",
     "left-light": "linear-gradient(90deg, #fff8e9b8, #fff8e966 70%, transparent)",
@@ -36,6 +39,24 @@
   let lastControlVersion = null;
   let slideTimer = null;
   let toastTimeout = null;
+  let displayExpired = false;
+
+  function getDisplayDeadline() {
+    const now = Date.now();
+    try {
+      const savedStart = Number(window.sessionStorage.getItem(displaySessionKey));
+      const startedAt = Number.isSafeInteger(savedStart) && savedStart > 0 && savedStart <= now
+        ? savedStart
+        : now;
+      if (startedAt !== savedStart) {
+        window.sessionStorage.setItem(displaySessionKey, String(startedAt));
+      }
+      return startedAt + maxDisplayDuration;
+    } catch (error) {
+      console.warn("Could not preserve the display session start time.", error);
+      return now + maxDisplayDuration;
+    }
+  }
 
   function showView(view) {
     slideshow.classList.toggle("hidden", view !== "slideshow");
@@ -49,6 +70,21 @@
     } else {
       showView(currentMode);
     }
+  }
+
+  function endDisplayIfExpired() {
+    if (displayExpired) return true;
+    if (Date.now() < displayDeadline) return false;
+    displayExpired = true;
+    window.clearTimeout(slideTimer);
+    slideTimer = null;
+    slideshowPaused = true;
+    currentMode = "special";
+    $("specialMessage").textContent = "Thank you for celebrating with us.";
+    $("slideshowState").textContent = "The three-hour display session has ended.";
+    audio.pause();
+    showView("special");
+    return true;
   }
 
   function shuffleQueue() {
@@ -307,14 +343,21 @@
 
   function scheduleSlide() {
     window.clearTimeout(slideTimer);
-    if (slideshowPaused || !slides.length || currentMode === "meter" || currentMode === "special") {
+    if (
+      endDisplayIfExpired()
+      || slideshowPaused
+      || !slides.length
+      || currentMode === "meter"
+      || currentMode === "special"
+    ) {
       return;
     }
 
     slideTimer = window.setTimeout(() => {
+      if (endDisplayIfExpired()) return;
       advanceSlide();
       scheduleSlide();
-    }, slideDuration * 1000);
+    }, Math.min(slideDuration * 1000, displayDeadline - Date.now()));
   }
 
   window.addEventListener("resize", () => {
@@ -391,10 +434,12 @@
   }
 
   async function refresh() {
+    if (endDisplayIfExpired()) return;
     try {
       const response = await fetch("/api/results", { cache: "no-store" });
       if (!response.ok) throw new Error("Results request failed.");
       const data = await response.json();
+      if (endDisplayIfExpired()) return;
       $("connectionStatus").textContent = "● LIVE";
       const girlDelta = previousGirl === null ? 0 : data.girl - previousGirl;
       const boyDelta = previousBoy === null ? 0 : data.boy - previousBoy;
@@ -438,7 +483,7 @@
       $("connectionStatus").textContent = "● RECONNECTING";
       if (currentMode === "auto" && Date.now() >= meterUntil) showView("slideshow");
     } finally {
-      window.setTimeout(refresh, 5000);
+      if (!displayExpired) window.setTimeout(refresh, 5000);
     }
   }
 

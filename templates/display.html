@@ -1,3 +1,4 @@
+{% from "_baby_icons.html" import baby_girl_icon, baby_boy_icon %}
 <!doctype html>
 <html lang="en">
 <head>
@@ -5,7 +6,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="csrf-token" content="{{ csrf_token }}">
   <title>{{ event_title }} · Big Screen</title>
-  <link rel="stylesheet" href="/static/css/app.css?v=display-layout-4">
+  <link rel="stylesheet" href="/static/css/app.css?v=display-results-icons-1">
 </head>
 <body class="display-body">
   <main class="display-root">
@@ -32,13 +33,19 @@
         <article class="meter-item" aria-label="Baby Girl prediction share">
           <div class="meter-share" id="girlPercent">50%</div>
           <div class="column-track"><div class="column-fill girl-fill" id="girlFill"></div></div>
-          <h2>Baby Girl</h2>
+          <div class="meter-label">
+            <span class="baby-illustration girl-baby meter-baby-icon" aria-hidden="true">{{ baby_girl_icon() }}</span>
+            <h2>Baby Girl</h2>
+          </div>
           <div class="meter-vote-count"><span id="girlCount">0</span> votes</div>
         </article>
         <article class="meter-item" aria-label="Baby Boy prediction share">
           <div class="meter-share" id="boyPercent">50%</div>
           <div class="column-track"><div class="column-fill boy-fill" id="boyFill"></div></div>
-          <h2>Baby Boy</h2>
+          <div class="meter-label">
+            <span class="baby-illustration boy-baby meter-baby-icon" aria-hidden="true">{{ baby_boy_icon() }}</span>
+            <h2>Baby Boy</h2>
+          </div>
           <div class="meter-vote-count"><span id="boyCount">0</span> votes</div>
         </article>
       </div>
@@ -58,6 +65,6 @@
     <audio id="backgroundMusic" loop preload="none"></audio>
     <div class="display-toast" id="displayToast" role="status" aria-live="polite"></div>
   </main>
-  <script src="/static/js/display.js?v=display-layout-4" defer></script>
+  <script src="/static/js/display.js?v=display-runtime-1" defer></script>
 </body>
 </html>

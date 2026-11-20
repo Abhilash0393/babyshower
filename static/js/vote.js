@@ -10,6 +10,8 @@
   const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
   const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
   let audioContext = null;
+  let boothResetTimeout = null;
+  let boothCountdownInterval = null;
   let busy = false;
 
   function applyMotionPreference() {
@@ -76,9 +78,38 @@
     chosen.textContent = `You chose ${choice === "girl" ? "Baby Girl" : "Baby Boy"}`;
     voteCard.classList.add("hidden");
     thankyouCard.classList.remove("hidden");
-    again.textContent = mode === "booth" ? "Cast My Vote Again" : "Done";
+    again.textContent = mode === "booth" ? "Click to Vote Again" : "Done";
     document.getElementById("thankyouStatus").textContent = note;
     again.focus();
+    startBoothReset();
+  }
+
+  function resetBoothVoting() {
+    window.clearTimeout(boothResetTimeout);
+    window.clearInterval(boothCountdownInterval);
+    boothResetTimeout = null;
+    boothCountdownInterval = null;
+    thankyouCard.classList.add("hidden");
+    voteCard.classList.remove("hidden");
+    status.textContent = "";
+    buttons.forEach((button) => { button.disabled = false; });
+    buttons[0].focus();
+  }
+
+  function startBoothReset() {
+    if (mode !== "booth") return;
+    window.clearTimeout(boothResetTimeout);
+    window.clearInterval(boothCountdownInterval);
+    const thankyouStatus = document.getElementById("thankyouStatus");
+    let secondsRemaining = 5;
+    thankyouStatus.textContent = `Returning to voting in ${secondsRemaining} seconds.`;
+    boothCountdownInterval = window.setInterval(() => {
+      secondsRemaining -= 1;
+      if (secondsRemaining > 0) {
+        thankyouStatus.textContent = `Returning to voting in ${secondsRemaining} seconds.`;
+      }
+    }, 1000);
+    boothResetTimeout = window.setTimeout(resetBoothVoting, 5000);
   }
 
   async function cast(choice, button) {
@@ -132,11 +163,7 @@
 
   again.addEventListener("click", () => {
     if (mode === "booth") {
-      thankyouCard.classList.add("hidden");
-      voteCard.classList.remove("hidden");
-      status.textContent = "";
-      buttons.forEach((button) => { button.disabled = false; });
-      buttons[0].focus();
+      resetBoothVoting();
       return;
     }
     document.getElementById("thankyouStatus").textContent =

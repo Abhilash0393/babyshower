@@ -206,8 +206,11 @@ def test_display_uses_prediction_language_percentages_and_kolam_frame(client):
     assert b'id="toggleMusicButton"' in page
     assert b"Enable Music</button>" not in page
     assert b'id="captionText"' in page
-    assert b"display.js?v=display-layout-4" in page
-    assert b"app.css?v=display-layout-4" in page
+    assert b"display.js?v=display-runtime-1" in page
+    assert b"app.css?v=display-results-icons-1" in page
+    assert b'class="baby-illustration girl-baby meter-baby-icon"' in page
+    assert b'class="baby-illustration boy-baby meter-baby-icon"' in page
+    assert page.count(b'class="baby-art"') == 2
     assert b"captionCategory" not in page
     assert b"captionAuthor" not in page
     assert b"slide.author" not in script
@@ -230,12 +233,10 @@ def test_slides_expose_validated_image_specific_caption_layouts(client):
     slides = client.get("/api/slides").json["slides"]
     by_id = {slide["id"]: slide for slide in slides}
 
-    assert by_id["motherhood-tender-guidance"]["text_layout"]["position"] == "top-right"
-    assert by_id["motherhood-golden-hour"]["text_layout"]["position"] == "center-right"
-    assert by_id["motherhood-lifted-high"]["text_layout"]["position"] == "center-left"
-    assert by_id["motherhood-tender-guidance"]["text_layout"]["mobileMaxWidthPct"] == 40
-    assert by_id["motherhood-tender-guidance"]["text_layout"]["mobileInsetYVh"] == 1
-    assert by_id["motherhood-golden-hour"]["text_layout"]["mobileMaxWidthPct"] == 18
+    assert by_id["motherhood-bright-discovery"]["text_layout"]["position"] == "top-left"
+    assert by_id["motherhood-quiet-embrace"]["text_layout"]["position"] == "center-right"
+    assert by_id["motherhood-shared-smile"]["text_layout"]["position"] == "top-left"
+    assert by_id["motherhood-bubble-discovery"]["text_layout"]["position"] == "top-right"
     assert by_id["pexels-freestockpro-8403890"]["text_layout"]["position"] == "bottom-left"
     for slide in slides:
         layout = slide["text_layout"]
@@ -322,9 +323,12 @@ def test_voting_modes_show_clear_choices_without_install_or_privacy_copy(client)
         assert b"Baby Girl" in response.data
         assert b"Baby Boy" in response.data
         assert b'id="reduceMotionToggle"' not in response.data
+        assert b"Reduce motion" not in response.data
         assert b'id="choiceAnnouncement"' in response.data
         assert b"No app to install" not in response.data
         assert b"identity-verified one-vote-per-person" not in response.data
+        if mode == "booth":
+            assert b"Click to Vote Again" in response.data
 
 
 def test_invitation_has_configured_event_and_no_rsvp(client):
