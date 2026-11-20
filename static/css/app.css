@@ -227,6 +227,51 @@ footer { color: var(--muted); font-size: 12px; }
   animation: choice-announcement 1400ms cubic-bezier(.2, 1.25, .35, 1) both;
   visibility: visible;
 }
+.vote-celebration {
+  position: fixed;
+  z-index: 20;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: #fffaf0f2;
+  opacity: 0;
+  visibility: hidden;
+}
+.vote-celebration.is-visible {
+  animation: vote-celebration-fade 1150ms ease both;
+  visibility: visible;
+}
+.celebration-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+.celebration-baby {
+  width: clamp(190px, 42vw, 320px);
+  height: clamp(190px, 42vw, 320px);
+  border-width: 4px;
+  box-shadow: inset 0 0 0 8px #fffdf8a8, 0 18px 48px #522a3240;
+}
+.celebration-baby .baby-art {
+  width: calc(100% - 24px);
+  height: calc(100% - 24px);
+}
+.vote-celebration.is-visible .celebration-baby {
+  animation: vote-baby-pop 1150ms cubic-bezier(.2, 1.25, .35, 1) both;
+}
+.celebration-label {
+  margin: 0;
+  color: var(--maroon-deep);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(30px, 7vw, 52px);
+  font-weight: 800;
+  text-shadow: 0 2px 0 #fff;
+}
+.thankyou-card.is-entering {
+  animation: thankyou-enter 450ms ease-out both;
+}
 .reduce-motion .choice,
 .reduce-motion .choice.is-muted { transition: none; }
 .reduce-motion .choice.is-selecting,
@@ -238,6 +283,10 @@ footer { color: var(--muted); font-size: 12px; }
   opacity: 1;
   transform: translate(-50%, -50%);
 }
+.reduce-motion .vote-celebration.is-visible,
+.reduce-motion .vote-celebration.is-visible .celebration-baby,
+.reduce-motion .thankyou-card.is-entering { animation: none; }
+.reduce-motion .vote-celebration.is-visible { opacity: 1; }
 
 .success-mark {
   width: 72px;
@@ -945,6 +994,21 @@ footer { display: block; text-align: center; }
   0%, 100% { transform: scale(1); box-shadow: 0 9px 22px #522a3218; }
   35% { transform: scale(1.1); box-shadow: 0 0 0 8px #d5a84690, 0 0 0 22px #d5a84635, 0 18px 40px #522a3240; }
   65% { transform: scale(1.07); box-shadow: 0 0 0 5px #d5a84670, 0 0 0 16px #d5a84625, 0 15px 34px #522a3230; }
+}
+@keyframes vote-celebration-fade {
+  0% { opacity: 0; }
+  16%, 82% { opacity: 1; }
+  100% { opacity: 0; }
+}
+@keyframes vote-baby-pop {
+  0% { opacity: 0; transform: translateY(28px) scale(.38) rotate(-8deg); }
+  22% { opacity: 1; transform: translateY(-12px) scale(1.12) rotate(4deg); }
+  48% { transform: translateY(3px) scale(.97) rotate(-2deg); }
+  72%, 100% { opacity: 1; transform: translateY(0) scale(1) rotate(0); }
+}
+@keyframes thankyou-enter {
+  from { opacity: 0; transform: translateY(14px) scale(.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 @keyframes baby-celebrate { 35% { transform: translateY(-14px) rotate(-7deg) scale(1.15); } 70% { transform: translateY(0) rotate(5deg) scale(1.08); } }
 @keyframes selection-sparkle { 0% { opacity: 0; transform: scale(.2) rotate(0); } 45% { opacity: 1; transform: scale(1.2) rotate(25deg); } 100% { opacity: 0; transform: scale(.7) translateY(-18px) rotate(45deg); } }

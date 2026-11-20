@@ -5,7 +5,12 @@
   const status = document.getElementById("voteStatus");
   const chosen = document.getElementById("chosenText");
   const again = document.getElementById("againButton");
-  const announcement = document.getElementById("choiceAnnouncement");
+  const celebration = document.getElementById("voteCelebration");
+  const celebrationLabel = document.getElementById("celebrationLabel");
+  const celebrationIcons = {
+    girl: document.getElementById("girlCelebrationIcon"),
+    boy: document.getElementById("boyCelebrationIcon"),
+  };
   const buttons = [...document.querySelectorAll(".choice")];
   const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
   const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -53,31 +58,39 @@
     }
   }
 
-  function animateSelection(button) {
-    buttons.forEach((choice) => {
-      choice.classList.toggle("is-selecting", choice === button);
-      choice.classList.toggle("is-muted", choice !== button);
+  async function showVoteCelebration(choice) {
+    Object.entries(celebrationIcons).forEach(([name, icon]) => {
+      icon.classList.toggle("hidden", name !== choice);
     });
-    const choice = button.dataset.choice;
-    announcement.textContent = `You chose ${choice === "girl" ? "Baby Girl" : "Baby Boy"}!`;
-    announcement.classList.add("is-visible");
-    const duration = motionPreference.matches ? 800 : 1400;
-    return new Promise((resolve) => {
-      window.setTimeout(() => {
-        buttons.forEach((choice) => {
-          choice.classList.remove("is-selecting", "is-muted");
-        });
-        announcement.classList.remove("is-visible");
-        announcement.textContent = "";
-        resolve();
-      }, duration);
-    });
+    celebrationLabel.textContent = choice === "girl" ? "Baby Girl!" : "Baby Boy!";
+    celebration.classList.remove("hidden");
+    await new Promise((resolve) => window.requestAnimationFrame(resolve));
+    celebration.classList.add("is-visible");
+    await new Promise((resolve) => window.setTimeout(
+      resolve, motionPreference.matches ? 450 : 1150
+    ));
+    celebration.classList.remove("is-visible");
+    celebration.classList.add("hidden");
+    Object.values(celebrationIcons).forEach((icon) => icon.classList.add("hidden"));
+  }
+
+  async function confirmVote(choice, note = "") {
+    try {
+      await showVoteCelebration(choice);
+    } catch (error) {
+      console.error("The vote was confirmed, but its celebration could not be displayed.", error);
+    }
+    showConfirmation(choice, note);
   }
 
   function showConfirmation(choice, note = "") {
     chosen.textContent = `You chose ${choice === "girl" ? "Baby Girl" : "Baby Boy"}`;
     voteCard.classList.add("hidden");
     thankyouCard.classList.remove("hidden");
+    thankyouCard.classList.remove("is-entering");
+    void thankyouCard.offsetWidth;
+    thankyouCard.classList.add("is-entering");
+    window.setTimeout(() => thankyouCard.classList.remove("is-entering"), 450);
     again.textContent = mode === "booth" ? "Click to Vote Again" : "Done";
     document.getElementById("thankyouStatus").textContent = note;
     again.focus();
@@ -112,27 +125,51 @@
     boothResetTimeout = window.setTimeout(resetBoothVoting, 5000);
   }
 
-  async function cast(choice, button) {
+  async function cast(choice) {
     if (busy) return;
     busy = true;
     status.textContent = `You chose ${choice === "girl" ? "Baby Girl" : "Baby Boy"}! Saving your prediction…`;
     buttons.forEach((button) => { button.disabled = true; });
     playSelectionChime();
-    const selectionAnimation = animateSelection(button);
 
     try {
-      const response = await fetch("/api/vote", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRF-Token": csrfToken,
-        },
-        body: JSON.stringify({ choice, source: mode }),
-      });
-      const data = await response.json();
+      let response;
+      try {
+        response = await fetch("/api/vote", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-Token": csrfToken,
+          },
+          body: JSON.stringify({ choice, source: mode }),
+        });
+      } catch (error) {
+        console.warn("Could not reach the voting service.", error);
+        status.textContent = "Could not reach the voting service. Check your connection and try again.";
+        return;
+      }
+
+      let data;
+      try {
+        data = await response.json();
+      } catch (error) {
+        console.error(`Voting service returned an unreadable response (HTTP ${response.status}).`, error);
+        status.textContent = response.ok
+          ? "Your vote may have been recorded, but confirmation was unreadable. Please check before voting again."
+          : `Voting service returned an unreadable response (HTTP ${response.status}). Please reload or ask event staff for help.`;
+        return;
+      }
+
+      if (!data || typeof data !== "object" || Array.isArray(data)) {
+        console.error(`Voting service returned an invalid response body (HTTP ${response.status}).`);
+        status.textContent = response.ok
+          ? "Your vote may have been recorded, but confirmation was invalid. Please check before voting again."
+          : `Voting service returned an invalid response (HTTP ${response.status}). Please reload or ask event staff for help.`;
+        return;
+      }
+
       if (response.ok && data.accepted === true) {
-        await selectionAnimation;
-        showConfirmation(choice);
+        await confirmVote(choice);
         return;
       }
       if (
@@ -140,15 +177,10 @@
         && data.already_voted === true
         && (data.recorded_choice === "girl" || data.recorded_choice === "boy")
       ) {
-        await selectionAnimation;
-        showConfirmation(data.recorded_choice, "Your earlier prediction is already recorded.");
+        await confirmVote(data.recorded_choice, "Your earlier prediction is already recorded.");
         return;
       }
-      await selectionAnimation;
       status.textContent = data.error || "Could not record your prediction. Please try again.";
-    } catch (error) {
-      await selectionAnimation;
-      status.textContent = "Connection issue. Your vote was not confirmed; please try again.";
     } finally {
       if (voteCard.classList.contains("hidden") === false) {
         buttons.forEach((button) => { button.disabled = false; });
@@ -158,7 +190,7 @@
   }
 
   buttons.forEach((button) => {
-    button.addEventListener("click", () => cast(button.dataset.choice, button));
+    button.addEventListener("click", () => cast(button.dataset.choice));
   });
 
   again.addEventListener("click", () => {

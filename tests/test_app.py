@@ -324,7 +324,9 @@ def test_voting_modes_show_clear_choices_without_install_or_privacy_copy(client)
         assert b"Baby Boy" in response.data
         assert b'id="reduceMotionToggle"' not in response.data
         assert b"Reduce motion" not in response.data
-        assert b'id="choiceAnnouncement"' in response.data
+        assert b'id="voteCelebration"' in response.data
+        assert b'id="girlCelebrationIcon"' in response.data
+        assert b'id="boyCelebrationIcon"' in response.data
         assert b"No app to install" not in response.data
         assert b"identity-verified one-vote-per-person" not in response.data
         if mode == "booth":
